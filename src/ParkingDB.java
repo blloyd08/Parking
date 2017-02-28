@@ -15,8 +15,8 @@ import java.util.Properties;
  */
 
 public class ParkingDB {
-	private static String userName = "mmuppa"; //Change to yours
-	private static String password = "mysqlpassword";
+	private static String userName = "concox"; //Change to yours
+	private static String password = "fumCin";
 	private static String serverName = "cssgate.insttech.washington.edu";
 	private static Connection conn;
 	private List<Movies> list;

@@ -20,28 +20,30 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 {
 	
 	private static final long serialVersionUID = 1779520078061383929L;
-	private JButton btnList, btnSearch, btnAdd;
-	private JPanel pnlButtons, pnlContent;
+	private JButton btnList, btnSearch, btnStaff;
+	private JPanel pnlButtons, pnlParking;
 	private ParkingDB db;
 	private List<Movies> list;
-	private String[] columnNames = {"Title",
-            "Year",
-            "Length",
-            "Genre",
-            "StudioName"};
 	
 	private Object[][] data;
+	private Object[][] staffData;
 	private JTable table;
+	private JTable staffTable;
 	private JScrollPane scrollPane;
-	private JPanel pnlSearch;
-	private JLabel lblTitle;;
+	private JPanel pnlVisitor;
+	private JLabel lblTitle;
 	private JTextField txfTitle;
 	private JButton btnTitleSearch;
+	private String[] columnNames = {"Title",
+			"Year",
+			"Length",
+			"Genre",
+			"StudioName"};
 	
-	private JPanel pnlAdd;
-	private JLabel[] txfLabel = new JLabel[5];
-	private JTextField[] txfField = new JTextField[5];
-	private JButton btnAddMovie;
+	private JPanel pnlStaff;
+	private JLabel[] txfLabel = new JLabel[6];
+	private JTextField[] txfField = new JTextField[6];
+	private JButton btnAddStaff;
 	
 	
 	/**
@@ -78,68 +80,74 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 	 * Creates panels for Movie list, search, add and adds the corresponding 
 	 * components to each panel.
 	 */
-	private void createComponents()
-	{
+	private void createComponents() {
 		pnlButtons = new JPanel();
-		btnList = new JButton("Movie List");
+		btnList = new JButton("Parking");
 		btnList.addActionListener(this);
-		
-		btnSearch = new JButton("Movie Search");
+
+		btnSearch = new JButton("Visitors");
 		btnSearch.addActionListener(this);
 		
-		btnAdd = new JButton("Add Movie");
-		btnAdd.addActionListener(this);
+		btnStaff = new JButton("Staff");
+		btnStaff.addActionListener(this);
 		
 		pnlButtons.add(btnList);
 		pnlButtons.add(btnSearch);
-		pnlButtons.add(btnAdd);
+		pnlButtons.add(btnStaff);
 		add(pnlButtons, BorderLayout.NORTH);
 		
-		//List Panel
-		pnlContent = new JPanel();
+		//Parking Panel
+		pnlParking = new JPanel();
 		table = new JTable(data, columnNames);
 		scrollPane = new JScrollPane(table);
-		pnlContent.add(scrollPane);
+		pnlParking.add(scrollPane);
 		table.getModel().addTableModelListener(this);
-		
-		//Search Panel
-		pnlSearch = new JPanel();
+
+
+		//Visitor Panel
+		pnlVisitor = new JPanel();
 		lblTitle = new JLabel("Enter Title: ");
 		txfTitle = new JTextField(25);
 		btnTitleSearch = new JButton("Search");
 		btnTitleSearch.addActionListener(this);
-		pnlSearch.add(lblTitle);
-		pnlSearch.add(txfTitle);
-		pnlSearch.add(btnTitleSearch);
+		pnlVisitor.add(lblTitle);
+		pnlVisitor.add(txfTitle);
+		pnlVisitor.add(btnTitleSearch);
 		
-		//Add Panel
-		pnlAdd = new JPanel();
-		pnlAdd.setLayout(new GridLayout(6, 0));
-		String labelNames[] = {"Enter Title: ", "Enter Year: ", "Enter Length: ", "Enter Genre: ", "Enter Studio Name: "};
-		for (int i=0; i<labelNames.length; i++) {
+		//Staff Panel
+		pnlStaff = new JPanel();
+		pnlStaff.setLayout(new GridLayout(7, 0));
+		String[] staffColNames = {"Staff ID", "First Name: ", "Last Name: ",
+				"Telephone: ", "Extension: ", "License Number: "};
+		String[] currentStaff = {"Get IDs", "of staff members", "already in system"};
+		for (int i = 0; i< staffColNames.length; i++) {
 			JPanel panel = new JPanel();
-			txfLabel[i] = new JLabel(labelNames[i]);
+			txfLabel[i] = new JLabel(staffColNames[i]);
 			txfField[i] = new JTextField(25);
 			panel.add(txfLabel[i]);
-			panel.add(txfField[i]);
-			pnlAdd.add(panel);
+			if(i == 0) {
+				JComboBox stfIDs = new JComboBox(currentStaff);
+				stfIDs.setEditable(true);
+				panel.add(stfIDs);
+			} else {
+				panel.add(txfField[i]);
+			}
+			pnlStaff.add(panel);
 		}
 		JPanel panel = new JPanel();
-		btnAddMovie = new JButton("Add");
-		btnAddMovie.addActionListener(this);
-		panel.add(btnAddMovie);
-		pnlAdd.add(panel);
+		btnAddStaff = new JButton("Add");
+		btnAddStaff.addActionListener(this);
+		panel.add(btnAddStaff);
+		pnlStaff.add(panel);
 		
-		add(pnlContent, BorderLayout.CENTER);
-		
+		add(pnlParking, BorderLayout.CENTER);
 		
 	}
 
 	/**
 	 * @param args
 	 */
-	public static void main(String[] args)
-	{
+	public static void main(String[] args) {
 		ParkingGUI movieGUI = new ParkingGUI();
 		movieGUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -166,23 +174,23 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 				data[i][3] = list.get(i).getGenre();
 				data[i][4] = list.get(i).getStudioName();
 			}
-			pnlContent.removeAll();
+			pnlParking.removeAll();
 			table = new JTable(data, columnNames);
 			table.getModel().addTableModelListener(this);
 			scrollPane = new JScrollPane(table);
-			pnlContent.add(scrollPane);
-			pnlContent.revalidate();
+			pnlParking.add(scrollPane);
+			pnlParking.revalidate();
 			this.repaint();
 			
 		} else if (e.getSource() == btnSearch) {
-			pnlContent.removeAll();
-			pnlContent.add(pnlSearch);
-			pnlContent.revalidate();
+			pnlParking.removeAll();
+			pnlParking.add(pnlVisitor);
+			pnlParking.revalidate();
 			this.repaint();
-		} else if (e.getSource() == btnAdd) {
-			pnlContent.removeAll();
-			pnlContent.add(pnlAdd);
-			pnlContent.revalidate();
+		} else if (e.getSource() == btnStaff) {
+			pnlParking.removeAll();
+			pnlParking.add(pnlStaff);
+			pnlParking.revalidate();
 			this.repaint();
 			
 		} else if (e.getSource() == btnTitleSearch) {
@@ -197,15 +205,15 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 					data[i][3] = list.get(i).getGenre();
 					data[i][4] = list.get(i).getStudioName();
 				}
-				pnlContent.removeAll();
+				pnlParking.removeAll();
 				table = new JTable(data, columnNames);
 				table.getModel().addTableModelListener(this);
 				scrollPane = new JScrollPane(table);
-				pnlContent.add(scrollPane);
-				pnlContent.revalidate();
+				pnlParking.add(scrollPane);
+				pnlParking.revalidate();
 				this.repaint();
 			}
-		} else if (e.getSource() == btnAddMovie) {
+		} else if (e.getSource() == btnAddStaff) {
 			Movies movie = new Movies(txfField[0].getText(), Integer.parseInt(txfField[1].getText())
 					,Integer.parseInt(txfField[2].getText()), txfField[3].getText(), txfField[4].getText() );
 			db.addMovie(movie);

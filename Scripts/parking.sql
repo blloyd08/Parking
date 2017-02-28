@@ -13,7 +13,7 @@ CREATE TABLE ParkingLot(
 CREATE TABLE SpaceType (
 	`name` VARCHAR(15) PRIMARY KEY
 );
-
+q
 CREATE TABLE ParkingSpace (
 	spaceID INT AUTO_INCREMENT PRIMARY KEY,
 	lotName VARCHAR(100) NOT NULL REFERENCES ParkingLot(lotName),
@@ -45,7 +45,7 @@ CREATE TABLE VisitorReservation (
 	PRIMARY KEY (spaceID, reservedDay)
 );
 
--- Views -----------------------------------------------------------------------------------------------------------------
+-- Views ---------------------------------------------------------------------------------------------------------------
 -- Current Reservations
 CREATE VIEW  CurrentStaffReservation AS (
 SELECT *
