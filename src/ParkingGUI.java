@@ -20,20 +20,21 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 {
 	
 	private static final long serialVersionUID = 1779520078061383929L;
-	private JButton btnList, btnSearch, btnStaff;
+	private JButton btnList, btnSearch, btnStaff, btnStaffRes;
 	private JPanel pnlButtons, pnlParking;
 	private ParkingDB db;
 	private List<Movies> list;
 	
 	private Object[][] data;
-	private Object[][] staffData;
-	private JTable table;
-	private JTable staffTable;
+	private String[] currentStaff = {"Get IDs", "of staff members", "already in system"};
+	private String[] currentParking = {"Get IDs", "of parking spots", "already in system"};
+ 	private JTable table;
 	private JScrollPane scrollPane;
 	private JPanel pnlVisitor;
-	private JLabel lblTitle;
-	private JTextField txfTitle;
-	private JButton btnTitleSearch;
+	private JPanel pnlStaffRes;
+	private JButton btnSaveVisitorRes;
+
+	// gotta kill this
 	private String[] columnNames = {"Title",
 			"Year",
 			"Length",
@@ -41,11 +42,18 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 			"StudioName"};
 	
 	private JPanel pnlStaff;
-	private JLabel[] txfLabel = new JLabel[6];
-	private JTextField[] txfField = new JTextField[6];
 	private JButton btnAddStaff;
-	
-	
+	private JTextField[] txfStaff;
+	private JLabel[] lblStaff;
+	private JLabel[] lblVisit;
+	private JTextField[] txfVisit;
+	private JLabel[] lblStaffRes;
+	private JTextField[] txfStaffRes;
+	private JComboBox cmbIDVisit;
+	private JComboBox cmbIDStaffRes;
+	private JComboBox cmbIDStaff;
+	private JComboBox cmbParkVisit;
+	private JComboBox cmbParkStaffRes;
 	/**
 	 * Creates the frame and components and launches the GUI.
 	 */
@@ -90,10 +98,14 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 		
 		btnStaff = new JButton("Staff");
 		btnStaff.addActionListener(this);
+
+		btnStaffRes = new JButton("Staff Reservation");
+		btnStaffRes.addActionListener(this);
 		
 		pnlButtons.add(btnList);
 		pnlButtons.add(btnSearch);
 		pnlButtons.add(btnStaff);
+		pnlButtons.add(btnStaffRes);
 		add(pnlButtons, BorderLayout.NORTH);
 		
 		//Parking Panel
@@ -103,34 +115,51 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 		pnlParking.add(scrollPane);
 		table.getModel().addTableModelListener(this);
 
-
 		//Visitor Panel
 		pnlVisitor = new JPanel();
-		lblTitle = new JLabel("Enter Title: ");
-		txfTitle = new JTextField(25);
-		btnTitleSearch = new JButton("Search");
-		btnTitleSearch.addActionListener(this);
-		pnlVisitor.add(lblTitle);
-		pnlVisitor.add(txfTitle);
-		pnlVisitor.add(btnTitleSearch);
+		pnlVisitor.setLayout(new GridLayout(7, 0));
+		String[] lblVistors = {"Space: ", "Day: ", "Staff ID: ", "License: "};
+		lblVisit = new JLabel[lblVistors.length];
+		txfVisit = new JTextField[lblVistors.length];
+		for (int i = 0; i< lblVistors.length; i++) {
+			JPanel panel = new JPanel();
+			lblVisit[i] = new JLabel(lblVistors[i]);
+			txfVisit[i] = new JTextField(25);
+			panel.add(lblVisit[i]);
+			if(i == 2) {
+				cmbIDVisit = new JComboBox(currentStaff);
+				panel.add(cmbIDVisit);
+			} else if(i == 0) {
+				cmbParkVisit = new JComboBox(currentParking);
+				panel.add(cmbParkVisit);
+			} else {
+				panel.add(txfVisit[i]);
+			}
+			pnlVisitor.add(panel);
+		}
+
+		btnSaveVisitorRes = new JButton("Reserve");
+		btnSaveVisitorRes.addActionListener(this);
+		pnlVisitor.add(btnSaveVisitorRes);
 		
 		//Staff Panel
 		pnlStaff = new JPanel();
 		pnlStaff.setLayout(new GridLayout(7, 0));
 		String[] staffColNames = {"Staff ID", "First Name: ", "Last Name: ",
 				"Telephone: ", "Extension: ", "License Number: "};
-		String[] currentStaff = {"Get IDs", "of staff members", "already in system"};
+		lblStaff = new JLabel[staffColNames.length];
+		txfStaff = new JTextField[staffColNames.length];
 		for (int i = 0; i< staffColNames.length; i++) {
 			JPanel panel = new JPanel();
-			txfLabel[i] = new JLabel(staffColNames[i]);
-			txfField[i] = new JTextField(25);
-			panel.add(txfLabel[i]);
+			lblStaff[i] = new JLabel(staffColNames[i]);
+			txfStaff[i] = new JTextField(25);
+			panel.add(lblStaff[i]);
 			if(i == 0) {
-				JComboBox stfIDs = new JComboBox(currentStaff);
-				stfIDs.setEditable(true);
-				panel.add(stfIDs);
+				cmbIDStaff = new JComboBox(currentStaff);
+				cmbIDStaff.setEditable(true);
+				panel.add(cmbIDStaff);
 			} else {
-				panel.add(txfField[i]);
+				panel.add(txfStaff[i]);
 			}
 			pnlStaff.add(panel);
 		}
@@ -139,8 +168,34 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 		btnAddStaff.addActionListener(this);
 		panel.add(btnAddStaff);
 		pnlStaff.add(panel);
-		
 		add(pnlParking, BorderLayout.CENTER);
+
+		//Staff reservation
+		pnlStaffRes = new JPanel();
+		pnlStaffRes.setLayout(new GridLayout(7, 0));
+		String[] lblStaffResList = {"Space: ", "Start: ", "End: ", "Staff: ", "Rate: "};
+		lblStaffRes = new JLabel[lblStaffResList.length];
+		txfStaffRes = new JTextField[lblStaffResList.length];
+		for (int i = 0; i< lblStaffResList.length; i++) {
+			JPanel newPanel = new JPanel();
+			lblStaffRes[i] = new JLabel(lblStaffResList[i]);
+			txfStaffRes[i] = new JTextField(25);
+			newPanel.add(lblStaffRes[i]);
+			if(i == 3) {
+				cmbIDStaffRes = new JComboBox(currentStaff);
+				newPanel.add(cmbIDStaffRes);
+			} else if(i == 0) {
+				cmbParkStaffRes = new JComboBox(currentParking);
+				newPanel.add(cmbParkStaffRes);
+			} else {
+				newPanel.add(txfStaffRes[i]);
+			}
+			pnlStaffRes.add(newPanel);
+		}
+
+		btnSaveVisitorRes = new JButton("Reserve");
+		btnSaveVisitorRes.addActionListener(this);
+		pnlStaffRes.add(btnSaveVisitorRes);
 		
 	}
 
@@ -192,9 +247,14 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 			pnlParking.add(pnlStaff);
 			pnlParking.revalidate();
 			this.repaint();
-			
-		} else if (e.getSource() == btnTitleSearch) {
-			String title = txfTitle.getText();
+		} else if (e.getSource() == btnStaffRes) {
+			pnlParking.removeAll();
+			pnlParking.add(pnlStaffRes);
+			pnlParking.revalidate();
+			this.repaint();
+		} else if (e.getSource() == btnSaveVisitorRes) {
+			// Need to change this shit up
+			String title = txfVisit[1].getText();
 			if (title.length() > 0) {
 				list = db.getMovies(title);
 				data = new Object[list.size()][columnNames.length];
@@ -214,12 +274,12 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 				this.repaint();
 			}
 		} else if (e.getSource() == btnAddStaff) {
-			Movies movie = new Movies(txfField[0].getText(), Integer.parseInt(txfField[1].getText())
-					,Integer.parseInt(txfField[2].getText()), txfField[3].getText(), txfField[4].getText() );
+			Movies movie = new Movies(txfStaff[0].getText(), Integer.parseInt(txfStaff[1].getText())
+					,Integer.parseInt(txfStaff[2].getText()), txfStaff[3].getText(), txfStaff[4].getText() );
 			db.addMovie(movie);
 			JOptionPane.showMessageDialog(null, "Added Successfully!");
-			for (int i=0; i<txfField.length; i++) {
-				txfField[i].setText("");
+			for (int i=0; i<txfStaff.length; i++) {
+				txfStaff[i].setText("");
 			}
 		}
 		
