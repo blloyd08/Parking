@@ -19,7 +19,7 @@ import java.util.Properties;
 public class ParkingDB {
 	private static Connection conn;
 	private List<Staff> staffList;
-
+	private String userName = "concox"; //Change to yours
 	/**
 	 * Creates a sql connection to MySQL using the properties for
 	 * user id, password and server information.
@@ -49,7 +49,7 @@ public class ParkingDB {
             createConnection();
         }
         Statement stmt = null;
-        String query = "select * from VisitorSpaces V where V.spaceID not in (select spaceID from VisitorReservation)" +
+        String query = "select * from VisitorSpaces V where V.spaceID not in (select spaceID from VisitorReservation) " +
                 "where reservedDay !=" + theSelectedDate + ")";
 
         ArrayList<Integer> availParking = new ArrayList<>();
@@ -80,7 +80,7 @@ public class ParkingDB {
             createConnection();
         }
         Statement stmt = null;
-        String query = "select * from ParkingSpace where spaceID not in (select spaceID from CurrentStaffReservation)" +
+        String query = "select * from ParkingSpace where spaceID not in (select spaceID from CurrentStaffReservation) " +
                 "and spaceType = 'Covered'";
 
         ArrayList<Integer> availParking = new ArrayList<>();
@@ -142,7 +142,7 @@ public class ParkingDB {
 		}
 		Statement stmt = null;
 		String query = "select firstName, lastName, telephone, extention"
-				+ "from youruwnetid.Staff ";
+				+ " from " + userName + ".Staff ";
 
 		staffList = new ArrayList<>();
 		try {
@@ -178,7 +178,7 @@ public class ParkingDB {
         }
         Statement stmt = null;
         String query = "select spaceID, startDate, endDate, staffID, rate "
-                + "from youruwnetid.StaffReservation ";
+                + "from " + userName + ".StaffReservation ";
 
         ArrayList<StaffReservation> staffResList = new ArrayList<>();
         try {
@@ -214,7 +214,7 @@ public class ParkingDB {
         }
         Statement stmt = null;
         String query = "select spaceID, reservedDay, staffID, licenseNumber "
-                + "from youruwnetid.StaffReservation ";
+                + "from " + userName + ".StaffReservation ";
         List<VisitorReservation> visitorResList = new ArrayList<>();
         try {
             stmt = conn.createStatement();
@@ -262,7 +262,7 @@ public class ParkingDB {
 	 * @param theStaff a staff member to add.
 	 */
 	public void addStaff(Staff theStaff) {
-		String sql = "insert into youruwnetid.Staff values " + "(?, ?, ?, ?, ?, ?); ";
+		String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?, ?, ?, ?); ";
 
 		PreparedStatement preparedStatement;
 		try {
@@ -284,7 +284,7 @@ public class ParkingDB {
      * @param theSR a staff reservation to add.
      */
     public void addStaffReservation(StaffReservation theSR) {
-        String sql = "insert into youruwnetid.Staff values " + "(?, ?, ?, ?, ?); ";
+        String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?, ?, ?); ";
 
         PreparedStatement preparedStatement;
         try {
@@ -305,7 +305,7 @@ public class ParkingDB {
      * @param theVR a visitor reservation to add.
      */
     public void addVisitorReservation(VisitorReservation theVR) {
-        String sql = "insert into youruwnetid.Staff values " + "(?, ?, ?, ?); ";
+        String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?, ?); ";
 
         PreparedStatement preparedStatement;
         try {
@@ -325,7 +325,7 @@ public class ParkingDB {
      * @param theParkingSpace a parking space to add.
      */
     public void addParkingSpace(ParkingSpace theParkingSpace) {
-        String sql = "insert into youruwnetid.Staff values " + "(?, ?, ?); ";
+        String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?); ";
 
         PreparedStatement preparedStatement;
         try {
@@ -344,7 +344,7 @@ public class ParkingDB {
      * @param theParkingLot a parking lot to add.
      */
     public void addParkingLot(ParkingLot theParkingLot) {
-        String sql = "insert into youruwnetid.Staff values " + "(?, ?, ?, ?); ";
+        String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?, ?); ";
 
         PreparedStatement preparedStatement;
         try {
@@ -367,7 +367,7 @@ public class ParkingDB {
      */
     public void updateMovie(int theStaffID, String theExtention, String theLicenseNumber) {
 
-        String sql = "update youruwnetid.Staff set extention = ?, licenseNumber = ? where staffID =" + theStaffID;
+        String sql = "update " + userName + ".Staff set extention = ?, licenseNumber = ? where staffID =" + theStaffID;
         System.out.println(sql);
         PreparedStatement preparedStatement = null;
         try {
