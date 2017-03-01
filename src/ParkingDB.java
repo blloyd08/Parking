@@ -50,7 +50,7 @@ public class ParkingDB {
         }
         Statement stmt = null;
         String query = "select * from VisitorSpaces V where V.spaceID not in (select spaceID from VisitorReservation)" +
-                "where reservedDay !='" + theSelectedDate + "')";
+                "where reservedDay !=" + theSelectedDate + ")";
 
         ArrayList<Integer> availParking = new ArrayList<>();
         try {
@@ -92,7 +92,7 @@ public class ParkingDB {
                 availParking.add(spaceID);
             }
         } catch (SQLException e) {
-            System.out.println(e);
+            e.printStackTrace();
         } finally {
             if (stmt != null) {
                 stmt.close();
@@ -122,7 +122,7 @@ public class ParkingDB {
                 lotNames.add(lotName);
             }
         } catch (SQLException e) {
-            System.out.println(e);
+            e.printStackTrace();
         } finally {
             if (stmt != null) {
                 stmt.close();
@@ -158,7 +158,7 @@ public class ParkingDB {
 				staffList.add(staff);
 			}
 		} catch (SQLException e) {
-			System.out.println(e);
+			e.printStackTrace();
 		} finally {
 			if (stmt != null) {
 				stmt.close();
@@ -194,7 +194,7 @@ public class ParkingDB {
                 staffResList.add(sr);
             }
         } catch (SQLException e) {
-            System.out.println(e);
+            e.printStackTrace();
         } finally {
             if (stmt != null) {
                 stmt.close();
@@ -228,7 +228,7 @@ public class ParkingDB {
                 visitorResList.add(vr);
             }
         } catch (SQLException e) {
-            System.out.println(e);
+            e.printStackTrace();
         } finally {
             if (stmt != null) {
                 stmt.close();
@@ -275,7 +275,6 @@ public class ParkingDB {
 			preparedStatement.setString(6, theStaff.getLicense());
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
-			System.out.println(e);
 			e.printStackTrace();
 		} 
 	}
@@ -297,7 +296,6 @@ public class ParkingDB {
             preparedStatement.setDouble(5, theSR.getRate());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println(e);
             e.printStackTrace();
         }
     }
@@ -318,7 +316,6 @@ public class ParkingDB {
             preparedStatement.setString(4, theVR.getLicense());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println(e);
             e.printStackTrace();
         }
     }
@@ -338,7 +335,6 @@ public class ParkingDB {
             preparedStatement.setString(3, theParkingSpace.getType());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println(e);
             e.printStackTrace();
         }
     }
@@ -359,8 +355,29 @@ public class ParkingDB {
             preparedStatement.setFloat(4, theParkingLot.getFloors());
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
-            System.out.println(e);
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Modifies the staff's data to be updated with the new information.
+     * @param theStaffID the staff member to modify
+     * @param theExtention the new extention
+     * @param theLicenseNumber the new license number
+     */
+    public void updateMovie(int theStaffID, String theExtention, String theLicenseNumber) {
+
+        String sql = "update youruwnetid.Staff set extention = ? and set licenseNumber = ? where staffID =" + theStaffID;
+        System.out.println(sql);
+        PreparedStatement preparedStatement = null;
+        try {
+            preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setString(1, theExtention);
+            preparedStatement.setString(2, theLicenseNumber);
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 }
