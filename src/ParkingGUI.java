@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -160,7 +161,7 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 		spaceHeading.setHorizontalAlignment(JLabel.CENTER);
 		pnlLotSpace.add(spaceHeading);
 		
-		//belowCapacityLots = (String[])getBelowCapacityLots().toArray();
+		belowCapacityLots = getBelowCapacityLots();
 		String[] spaceColNames = {"Lot: ", "Type: "};
 		lblSpace = new JLabel[spaceColNames.length];
 		cmbSpace = new JComboBox[spaceColNames.length];
@@ -425,15 +426,23 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 		}		
 	}
 	
-	private List<String> getBelowCapacityLots(){
+	private String[] getBelowCapacityLots(){
 		List<String> spaceLots = new ArrayList<String>();
 		try{
-			//spaceLots = ParkingDB.getBelowCapacityLotNames();
+			spaceLots = ParkingDB.getLotNamesBelowCapacity();
 		} catch (Exception e){
 			JOptionPane.showMessageDialog(this, "Lots for parking spaces could not be loaded,"
 					+ " only below capacity lots are displayed");
 		}
-		return spaceLots;
+		if (spaceLots.size() > 0){
+			String[] lotNames = new String[spaceLots.size()];
+			for (int i = 0; i < spaceLots.size(); i++){
+				lotNames[i] = spaceLots.get(i);
+			}
+			return lotNames;
+		} else {
+			return new String[0];
+		}
 	}
 
 	/**

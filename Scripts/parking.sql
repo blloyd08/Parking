@@ -95,6 +95,15 @@ Staff -> StaffReservation
 ParkingSpace -> StaffReservation
 */
 
+-- Lots that aren't at capacity
+-- Parking Space Lots Drop Down
+SELECT P.lotName
+FROM concox.ParkingLot P
+LEFT JOIN concox.LotCounts C
+ON P.lotName = C.lotName
+WHERE Spaces IS NULL
+OR capacity > Spaces
+
 INSERT INTO SpaceType VALUES
 ("Covered"),
 ("Free"),

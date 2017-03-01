@@ -102,6 +102,41 @@ public class ParkingDB {
         return availParking;
     }
     
+    /**
+     * Returns a list of lot names.
+     * @return lotNames list of names that the lots are named.
+     * @throws SQLException if an error occurs
+     */
+    public static List<String> getLotNamesBelowCapacity() throws SQLException {
+        if (conn == null) {
+            createConnection();
+        }
+        Statement stmt = null;
+        String query =     
+        	    "SELECT P.lotName " +
+        	    "FROM concox.ParkingLot P "+
+        	    "LEFT JOIN concox.LotCounts C " +
+        	    "ON P.lotName = C.lotName " +
+        	    "WHERE Spaces IS NULL " +
+        	    "OR capacity > Spaces";
+
+        ArrayList<String> lotNames = new ArrayList<>();
+        try {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                String lotName = rs.getString("lotName");
+                lotNames.add(lotName);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
+        return lotNames;
+    }
 
     /**
      * Returns a list of lot names.
