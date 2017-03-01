@@ -19,7 +19,7 @@ public class ParkingDB {
 	private static String password = "fumCin";
 	private static String serverName = "cssgate.insttech.washington.edu";
 	private static Connection conn;
-	private List<Movies> list;
+	private List<Staff> list;
 
 	/**
 	 * Creates a sql connection to MySQL using the properties for
@@ -42,7 +42,7 @@ public class ParkingDB {
 	 * @return list of movies
 	 * @throws SQLException
 	 */
-	public List<Movies> getMovies() throws SQLException {
+	public List<Staff> getStaff() throws SQLException {
 		if (conn == null) {
 			createConnection();
 		}
@@ -50,18 +50,18 @@ public class ParkingDB {
 		String query = "select title, year, length, genre, studioName "
 				+ "from youruwnetid.Movies ";
 
-		list = new ArrayList<Movies>();
+		list = new ArrayList<Staff>();
 		try {
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
 			while (rs.next()) {
-				String title = rs.getString("title");
-				int year = rs.getInt("year");
-				int length = rs.getInt("length");
-				String genre = rs.getString("genre");
-				String studioName = rs.getString("studioName");
-				Movies movie = new Movies(title, year, length, genre, studioName);
-				list.add(movie);
+				int staffID = rs.getInt("staffID");
+				String firstName = rs.getString("firstName");
+                String lastName = rs.getString("lastName");
+                String telephone = rs.getString("telephone");
+                String extention = rs.getString("extention");
+                Staff staff = new Staff(staffID, firstName, lastName, telephone, extention);
+				list.add(staff);
 			}
 		} catch (SQLException e) {
 			System.out.println(e);
@@ -76,39 +76,40 @@ public class ParkingDB {
 	/**
 	 * Filters the movie list to find the given title. Returns a list with the
 	 * movie objects that match the title provided.
-	 * @param title
+	 * @param ID
 	 * @return list of movies that contain the title.
 	 */
-	public List<Movies> getMovies(String title) {
-		List<Movies> filterList = new ArrayList<Movies>();
+	public List<Staff> getStaff(int ID) {
+		List<Staff> filterList = new ArrayList<Staff>();
 		try {
-			list = getMovies();
+			list = getStaff();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		for (Movies movie : list) {
-			if (movie.getTitle().toLowerCase().contains(title.toLowerCase())) {
-				filterList.add(movie);
+		for (Staff staff : list) {
+			if (staff.getStaffID() == (ID)) {
+				filterList.add(staff);
 			}
 		}
 		return filterList;
 	}
 
 	/**
-	 * Adds a new movie to the table.
-	 * @param movie 
+	 * Adds a new staff member to the table.
+	 * @param staff
 	 */
-	public void addMovie(Movies movie) {
-		String sql = "insert into youruwnetid.Movies values " + "(?, ?, ?, ?, ?, null); ";
+	public void addStaff(Staff staff) {
+		String sql = "insert into youruwnetid.Staff values " + "(?, ?, ?, ?, ?, ?, null); ";
 
 		PreparedStatement preparedStatement = null;
 		try {
 			preparedStatement = conn.prepareStatement(sql);
-			preparedStatement.setString(1, movie.getTitle());
-			preparedStatement.setInt(2, movie.getYear());
-			preparedStatement.setInt(3, movie.getLength());
-			preparedStatement.setString(4, movie.getGenre());
-			preparedStatement.setString(5, movie.getStudioName());
+			preparedStatement.setInt(1, staff.getStaffID());
+			preparedStatement.setString(2, staff.getFirstName());
+			preparedStatement.setString(3, staff.getLastName());
+			preparedStatement.setString(4, staff.getTelephone());
+			preparedStatement.setString(5, staff.getExtention());
+			preparedStatement.setString(6, staff.getLicense());
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			System.out.println(e);
@@ -116,33 +117,30 @@ public class ParkingDB {
 		} 
 	}
 
-	/**
-	 * Modifies the movie information corresponding to the index in the list.
-	 * @param row index of the element in the list
-	 * @param columnName attribute to modify
-	 * @param data value to supply
-	 */
-	public void updateMovie(int row, String columnName, Object data) {
-		
-		Movies movie = list.get(row);
-		String title = movie.getTitle();
-		int year = movie.getYear();
-		String sql = "update youruwnetid.Movies set " + columnName + " = ?  where title= ? and year = ? ";
-		System.out.println(sql);
-		PreparedStatement preparedStatement = null;
-		try {
-			preparedStatement = conn.prepareStatement(sql);
-			if (data instanceof String)
-				preparedStatement.setString(1, (String) data);
-			else if (data instanceof Integer)
-				preparedStatement.setInt(1, (Integer) data);
-			preparedStatement.setString(2, title);
-			preparedStatement.setInt(3, year);
-			preparedStatement.executeUpdate();
-		} catch (SQLException e) {
-			System.out.println(e);
-			e.printStackTrace();
-		} 
-		
-	}
+//	/**
+//	 * Modifies the movie information corresponding to the index in the list.
+//	 * @param row index of the element in the list
+//	 * @param columnName attribute to modify
+//	 * @param data value to supply
+//	 */
+//	public void updateStaff(int row, String columnName, Object data) {
+//		Staff staff = list.get(row);
+//        int ID = staff.getStaffID();
+//		String sql = "update youruwnetid.Movies set " + columnName + " = ?  where staffID = ?";
+//		System.out.println(sql);
+//		PreparedStatement preparedStatement = null;
+//		try {
+//			preparedStatement = conn.prepareStatement(sql);
+//			if (data instanceof String)
+//				preparedStatement.setString(1, (String) data);
+//			else if (data instanceof Integer)
+//				preparedStatement.setInt(1, (Integer) data);
+////			preparedStatement.setString(2, title);
+////			preparedStatement.setInt(3, year);
+//			preparedStatement.executeUpdate();
+//		} catch (SQLException e) {
+//			System.out.println(e);
+//			e.printStackTrace();
+//		}
+//	}
 }

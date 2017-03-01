@@ -1,4 +1,4 @@
-DROP DATABASE PARKING
+DROP DATABASE PARKING;
 
 CREATE DATABASE PARKING;
 USE PARKING;
@@ -13,7 +13,7 @@ CREATE TABLE ParkingLot(
 CREATE TABLE SpaceType (
 	`name` VARCHAR(15) PRIMARY KEY
 );
-q
+
 CREATE TABLE ParkingSpace (
 	spaceID INT AUTO_INCREMENT PRIMARY KEY,
 	lotName VARCHAR(100) NOT NULL REFERENCES ParkingLot(lotName),
@@ -61,7 +61,7 @@ WHERE S.staffID NOT IN (SELECT staffID FROM CurrentStaffReservation));
 
 
 SELECT *
-FROM CurrentStaffReservation
+FROM CurrentStaffReservation;
 -- Parking Space -> Lot Drop Down
 -- Parking Lots that aren't at capacity (Can create more spaces)
 CREATE VIEW UnfilledLots AS (
@@ -135,7 +135,7 @@ WHERE spaceID NOT IN (
 AND spaceType = "Covered";
 
 SELECT spaceID
-FROM CurrentStaffReservation
+FROM CurrentStaffReservation;
 
 
 SELECT *
@@ -149,8 +149,8 @@ AND spaceType = "Covered";
 -- Currently Reserved Spaces
 SELECT *
 FROM StaffReservation
-WHERE endDate < CURDATE()
+WHERE endDate < CURDATE();
 
 -- Lot spaces
 SELECT lotName, COUNT(spaceID) 'Spaces'
-FROM ParkingSpace
+FROM ParkingSpace;

@@ -23,7 +23,8 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 	private JButton btnList, btnSearch, btnStaff, btnStaffRes;
 	private JPanel pnlButtons, pnlParking;
 	private ParkingDB db;
-	private List<Movies> list;
+	//Which list?
+	private List<Staff> list;
 	
 	private Object[][] data;
 	private String[] currentStaff = {"Get IDs", "of staff members", "already in system"};
@@ -63,17 +64,17 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 		db = new ParkingDB();
 		try
 		{
-			list = db.getMovies();
-			
+			list = db.getStaff();
+
 			data = new Object[list.size()][columnNames.length];
-			for (int i=0; i<list.size(); i++) {
-				data[i][0] = list.get(i).getTitle();
-				data[i][1] = list.get(i).getYear();
-				data[i][2] = list.get(i).getLength();
-				data[i][3] = list.get(i).getGenre();
-				data[i][4] = list.get(i).getStudioName();
-				
-			}
+//			for (int i=0; i<list.size(); i++) {
+//				data[i][0] = list.get(i).getTitle();
+//				data[i][1] = list.get(i).getYear();
+//				data[i][2] = list.get(i).getLength();
+//				data[i][3] = list.get(i).getGenre();
+//				data[i][4] = list.get(i).getStudioName();
+//
+//			}
 			
 		} catch (SQLException e)
 		{
@@ -216,19 +217,19 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnList) {
 			try {
-				list = db.getMovies();
+				list = db.getStaff();
 			} catch (SQLException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
 			data = new Object[list.size()][columnNames.length];
-			for (int i=0; i<list.size(); i++) {
-				data[i][0] = list.get(i).getTitle();
-				data[i][1] = list.get(i).getYear();
-				data[i][2] = list.get(i).getLength();
-				data[i][3] = list.get(i).getGenre();
-				data[i][4] = list.get(i).getStudioName();
-			}
+//			for (int i=0; i<list.size(); i++) {
+//				data[i][0] = list.get(i).getTitle();
+//				data[i][1] = list.get(i).getYear();
+//				data[i][2] = list.get(i).getLength();
+//				data[i][3] = list.get(i).getGenre();
+//				data[i][4] = list.get(i).getStudioName();
+//			}
 			pnlParking.removeAll();
 			table = new JTable(data, columnNames);
 			table.getModel().addTableModelListener(this);
@@ -252,36 +253,34 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 			pnlParking.add(pnlStaffRes);
 			pnlParking.revalidate();
 			this.repaint();
-		} else if (e.getSource() == btnSaveVisitorRes) {
-			// Need to change this shit up
-			String title = txfVisit[1].getText();
-			if (title.length() > 0) {
-				list = db.getMovies(title);
-				data = new Object[list.size()][columnNames.length];
-				for (int i=0; i<list.size(); i++) {
-					data[i][0] = list.get(i).getTitle();
-					data[i][1] = list.get(i).getYear();
-					data[i][2] = list.get(i).getLength();
-					data[i][3] = list.get(i).getGenre();
-					data[i][4] = list.get(i).getStudioName();
-				}
-				pnlParking.removeAll();
-				table = new JTable(data, columnNames);
-				table.getModel().addTableModelListener(this);
-				scrollPane = new JScrollPane(table);
-				pnlParking.add(scrollPane);
-				pnlParking.revalidate();
-				this.repaint();
-			}
-		} else if (e.getSource() == btnAddStaff) {
-			Movies movie = new Movies(txfStaff[0].getText(), Integer.parseInt(txfStaff[1].getText())
-					,Integer.parseInt(txfStaff[2].getText()), txfStaff[3].getText(), txfStaff[4].getText() );
-			db.addMovie(movie);
-			JOptionPane.showMessageDialog(null, "Added Successfully!");
-			for (int i=0; i<txfStaff.length; i++) {
-				txfStaff[i].setText("");
-			}
 		}
+//		else if (e.getSource() == btnSaveVisitorRes) {
+//			// Need to change this shit up
+//			String title = txfVisit[1].getText();
+//			if (title.length() > 0) {
+//				list = db.getStaff(1234);
+//				data = new Object[list.size()][columnNames.length];
+//				for (int i=0; i<list.size(); i++) {
+//					data[i][0] = list.get(i).getTitle();
+//					data[i][1] = list.get(i).getYear();
+//					data[i][2] = list.get(i).getLength();
+//					data[i][3] = list.get(i).getGenre();
+//					data[i][4] = list.get(i).getStudioName();
+//				}
+//				pnlParking.removeAll();
+//				table = new JTable(data, columnNames);
+//				table.getModel().addTableModelListener(this);
+//				scrollPane = new JScrollPane(table);
+//				pnlParking.add(scrollPane);
+//				pnlParking.revalidate();
+//				this.repaint();
+//			}
+//		} else if (e.getSource() == btnAddStaff) {
+//			JOptionPane.showMessageDialog(null, "Added Successfully!");
+//			for (int i=0; i<txfStaff.length; i++) {
+//				txfStaff[i].setText("");
+//			}
+//		}
 		
 	}
 
@@ -295,9 +294,8 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
         TableModel model = (TableModel)e.getSource();
         String columnName = model.getColumnName(column);
         Object data = model.getValueAt(row, column);
-        
-        db.updateMovie(row, columnName, data);
-		
+
+
 	}
 
 }
