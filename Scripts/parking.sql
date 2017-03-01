@@ -137,7 +137,6 @@ AND spaceType = "Covered";
 SELECT spaceID
 FROM CurrentStaffReservation;
 
-
 SELECT *
 FROM ParkingSpace
 WHERE spaceID NOT IN (

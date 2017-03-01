@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -11,22 +12,23 @@ import java.util.Properties;
 /**
  * A class that consists of the database operations to insert and update the Movie information.
  * @author mmuppa
- *
+ * @author concox
+ * @author bbloyd
  */
 
 public class ParkingDB {
-	private static String userName = "concox"; //Change to yours
-	private static String password = "fumCin";
-	private static String serverName = "cssgate.insttech.washington.edu";
 	private static Connection conn;
-	private List<Staff> list;
+	private List<Staff> staffList;
 
 	/**
 	 * Creates a sql connection to MySQL using the properties for
-	 * userid, password and server information.
-	 * @throws SQLException
+	 * user id, password and server information.
+	 * @throws SQLException if an error occurs.
 	 */
-	public static void createConnection() throws SQLException {
+	private static void createConnection() throws SQLException {
+        String userName = "concox"; //Change to yours
+        String password = "fumCin";
+        String serverName = "cssgate.insttech.washington.edu";
 		Properties connectionProps = new Properties();
 		connectionProps.put("user", userName);
 		connectionProps.put("password", password);
@@ -38,19 +40,111 @@ public class ParkingDB {
 	}
 
 	/**
-	 * Returns a list of movie objects from the database.
-	 * @return list of movies
-	 * @throws SQLException
+     * Returns all visitor parking available on a specific day.
+     * @return availParking a list of available parking.
+     * @throws SQLException if an error occurs
+     */
+    public List<Integer> getVisitorAvailParking(Date theSelectedDate) throws SQLException {
+        if (conn == null) {
+            createConnection();
+        }
+        Statement stmt = null;
+        String query = "select * from VisitorSpaces V where V.spaceID not in (select spaceID from VisitorReservation)" +
+                "where reservedDay !='" + theSelectedDate + "')";
+
+        ArrayList<Integer> availParking = new ArrayList<>();
+        try {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                int spaceID = rs.getInt("spaceID");
+                availParking.add(spaceID);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
+        return availParking;
+    }
+
+    /**
+     * Returns all staff available parking on the current day.
+     * @return availParking a list of available parking.
+     * @throws SQLException if an error occurs
+     */
+    public List<Integer> getStaffAvailParking() throws SQLException {
+        if (conn == null) {
+            createConnection();
+        }
+        Statement stmt = null;
+        String query = "select * from ParkingSpace where spaceID not in (select spaceID from CurrentStaffReservation)" +
+                "and spaceType = 'Covered'";
+
+        ArrayList<Integer> availParking = new ArrayList<>();
+        try {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                int spaceID = rs.getInt("spaceID");
+                availParking.add(spaceID);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
+        return availParking;
+    }
+
+    /**
+     * Returns a list of lot names.
+     * @return lotNames list of names that the lots are named.
+     * @throws SQLException if an error occurs
+     */
+    public List<String> getLotNames() throws SQLException {
+        if (conn == null) {
+            createConnection();
+        }
+        Statement stmt = null;
+        String query = "select lotName from ParkingLot";
+
+        ArrayList<String> lotNames = new ArrayList<>();
+        try {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                String lotName = rs.getString("lotName");
+                lotNames.add(lotName);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
+        return lotNames;
+    }
+
+	/**
+	 * Returns a list of staff objects.
+	 * @return staffList staffList all the staff members in a list.
+	 * @throws SQLException if an error occurs
 	 */
 	public List<Staff> getStaff() throws SQLException {
 		if (conn == null) {
 			createConnection();
 		}
 		Statement stmt = null;
-		String query = "select title, year, length, genre, studioName "
-				+ "from youruwnetid.Movies ";
+		String query = "select firstName, lastName, telephone, extention"
+				+ "from youruwnetid.Staff ";
 
-		list = new ArrayList<Staff>();
+		staffList = new ArrayList<>();
 		try {
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
@@ -61,7 +155,7 @@ public class ParkingDB {
                 String telephone = rs.getString("telephone");
                 String extention = rs.getString("extention");
                 Staff staff = new Staff(staffID, firstName, lastName, telephone, extention);
-				list.add(staff);
+				staffList.add(staff);
 			}
 		} catch (SQLException e) {
 			System.out.println(e);
@@ -70,24 +164,93 @@ public class ParkingDB {
 				stmt.close();
 			}
 		}
-		return list;
+		return staffList;
 	}
 
+    /**
+     * Returns a a list of reservations held by staff members.
+     * @return staffResList holds staff reservation objects.
+     * @throws SQLException if an error occurs
+     */
+    public List<StaffReservation> getStaffRes() throws SQLException {
+        if (conn == null) {
+            createConnection();
+        }
+        Statement stmt = null;
+        String query = "select spaceID, startDate, endDate, staffID, rate "
+                + "from youruwnetid.StaffReservation ";
+
+        ArrayList<StaffReservation> staffResList = new ArrayList<>();
+        try {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                int spaceID = rs.getInt("spaceID");
+                Date startDate = rs.getDate("startDate");
+                Date endDate = rs.getDate("endDate");
+                int staffID = rs.getInt("staffID");
+                Double rate = rs.getDouble("rate");
+                StaffReservation sr = new StaffReservation(spaceID, startDate, endDate, staffID, rate);
+                staffResList.add(sr);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
+        return staffResList;
+    }
+
+    /**
+     * Returns a list of visitor reservations.
+     * @return visiorResList holds visitor reservation objects.
+     * @throws SQLException if an error occurs
+     */
+    public List<VisitorReservation> getVisitorRes() throws SQLException {
+        if (conn == null) {
+            createConnection();
+        }
+        Statement stmt = null;
+        String query = "select spaceID, reservedDay, staffID, licenseNumber "
+                + "from youruwnetid.StaffReservation ";
+        List<VisitorReservation> visitorResList = new ArrayList<>();
+        try {
+            stmt = conn.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+            while (rs.next()) {
+                int spaceID = rs.getInt("spaceID");
+                Date startDate = rs.getDate("reservedDay");
+                int staffID = rs.getInt("staffID");
+                String licenseNumber = rs.getString("licenseNumber");
+                VisitorReservation vr = new VisitorReservation(spaceID, startDate, staffID, licenseNumber);
+                visitorResList.add(vr);
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
+        return visitorResList;
+    }
+
 	/**
-	 * Filters the movie list to find the given title. Returns a list with the
-	 * movie objects that match the title provided.
-	 * @param ID
-	 * @return list of movies that contain the title.
+	 * Retrieves the staff member given the ID. There ~should~ only be one.
+	 * @param theID id of the staff member to retrieve
+	 * @return a list of staff members with that id.
 	 */
-	public List<Staff> getStaff(int ID) {
-		List<Staff> filterList = new ArrayList<Staff>();
+	public List<Staff> getStaff(int theID) {
+		List<Staff> filterList = new ArrayList<>();
 		try {
-			list = getStaff();
+			staffList = getStaff();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		for (Staff staff : list) {
-			if (staff.getStaffID() == (ID)) {
+		for (Staff staff : staffList) {
+			if (staff.getStaffID() == (theID)) {
 				filterList.add(staff);
 			}
 		}
@@ -96,20 +259,20 @@ public class ParkingDB {
 
 	/**
 	 * Adds a new staff member to the table.
-	 * @param staff
+	 * @param theStaff a staff member to add.
 	 */
-	public void addStaff(Staff staff) {
-		String sql = "insert into youruwnetid.Staff values " + "(?, ?, ?, ?, ?, ?, null); ";
+	public void addStaff(Staff theStaff) {
+		String sql = "insert into youruwnetid.Staff values " + "(?, ?, ?, ?, ?, ?); ";
 
-		PreparedStatement preparedStatement = null;
+		PreparedStatement preparedStatement;
 		try {
 			preparedStatement = conn.prepareStatement(sql);
-			preparedStatement.setInt(1, staff.getStaffID());
-			preparedStatement.setString(2, staff.getFirstName());
-			preparedStatement.setString(3, staff.getLastName());
-			preparedStatement.setString(4, staff.getTelephone());
-			preparedStatement.setString(5, staff.getExtention());
-			preparedStatement.setString(6, staff.getLicense());
+			preparedStatement.setInt(1, theStaff.getStaffID());
+			preparedStatement.setString(2, theStaff.getFirstName());
+			preparedStatement.setString(3, theStaff.getLastName());
+			preparedStatement.setString(4, theStaff.getTelephone());
+			preparedStatement.setString(5, theStaff.getExtention());
+			preparedStatement.setString(6, theStaff.getLicense());
 			preparedStatement.executeUpdate();
 		} catch (SQLException e) {
 			System.out.println(e);
@@ -117,30 +280,87 @@ public class ParkingDB {
 		} 
 	}
 
-//	/**
-//	 * Modifies the movie information corresponding to the index in the list.
-//	 * @param row index of the element in the list
-//	 * @param columnName attribute to modify
-//	 * @param data value to supply
-//	 */
-//	public void updateStaff(int row, String columnName, Object data) {
-//		Staff staff = list.get(row);
-//        int ID = staff.getStaffID();
-//		String sql = "update youruwnetid.Movies set " + columnName + " = ?  where staffID = ?";
-//		System.out.println(sql);
-//		PreparedStatement preparedStatement = null;
-//		try {
-//			preparedStatement = conn.prepareStatement(sql);
-//			if (data instanceof String)
-//				preparedStatement.setString(1, (String) data);
-//			else if (data instanceof Integer)
-//				preparedStatement.setInt(1, (Integer) data);
-////			preparedStatement.setString(2, title);
-////			preparedStatement.setInt(3, year);
-//			preparedStatement.executeUpdate();
-//		} catch (SQLException e) {
-//			System.out.println(e);
-//			e.printStackTrace();
-//		}
-//	}
+    /**
+     * Adds a new staff reservation to the database.
+     * @param theSR a staff reservation to add.
+     */
+    public void addStaffReservation(StaffReservation theSR) {
+        String sql = "insert into youruwnetid.Staff values " + "(?, ?, ?, ?, ?); ";
+
+        PreparedStatement preparedStatement;
+        try {
+            preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setInt(1, theSR.getSpaceID());
+            preparedStatement.setDate(2, theSR.getStartDate());
+            preparedStatement.setDate(3, theSR.getEndDate());
+            preparedStatement.setInt(4, theSR.getStaffID());
+            preparedStatement.setDouble(5, theSR.getRate());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Adds a new visitor reservation to the table.
+     * @param theVR a visitor reservation to add.
+     */
+    public void addVisitorReservation(VisitorReservation theVR) {
+        String sql = "insert into youruwnetid.Staff values " + "(?, ?, ?, ?); ";
+
+        PreparedStatement preparedStatement;
+        try {
+            preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setInt(1, theVR.getSpaceID());
+            preparedStatement.setDate(2, theVR.getReservedDay());
+            preparedStatement.setInt(3, theVR.getStaffID());
+            preparedStatement.setString(4, theVR.getLicense());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Adds a new parking space to the table.
+     * @param theParkingSpace a parking space to add.
+     */
+    public void addParkingSpace(ParkingSpace theParkingSpace) {
+        String sql = "insert into youruwnetid.Staff values " + "(?, ?, ?); ";
+
+        PreparedStatement preparedStatement;
+        try {
+            preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setInt(1, theParkingSpace.getSpaceID());
+            preparedStatement.setString(2, theParkingSpace.getLotName());
+            preparedStatement.setString(3, theParkingSpace.getType());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Adds a new parking lot to the table.
+     * @param theParkingLot a parking lot to add.
+     */
+    public void addParkingLot(ParkingLot theParkingLot) {
+        String sql = "insert into youruwnetid.Staff values " + "(?, ?, ?, ?); ";
+
+        PreparedStatement preparedStatement;
+        try {
+            preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setString(1, theParkingLot.getLotName());
+            preparedStatement.setString(2, theParkingLot.getLocation());
+            preparedStatement.setInt(3, theParkingLot.getCapacity());
+            preparedStatement.setFloat(4, theParkingLot.getFloors());
+            preparedStatement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e);
+            e.printStackTrace();
+        }
+    }
 }
