@@ -14,6 +14,7 @@ public class Staff {
 		LastName = lastName;
 		Telephone = telephone;
 		Extention = extention;
+		License = null;
 	}
 	public int getStaffID() {
 		return StaffID;

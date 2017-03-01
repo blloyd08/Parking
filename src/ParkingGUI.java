@@ -2,7 +2,11 @@ import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Date;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -29,7 +33,7 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 	private List<Staff> list;
 	
 	private Object[][] data;
-	private String[] currentStaff = {"Get IDs", "of staff members", "already in system"};
+	private String[] currentStaff = {"1234", "5678", "9101R"};
 	private String[] currentParking = {"Get IDs", "of parking spots", "already in system"};
 	private String[] belowCapacityLots = {"Lots"};
 	private String[] spaceType = {"Free","Covered","Visitor"};
@@ -77,24 +81,6 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 		super("Movie Store");
 		
 		db = new ParkingDB();
-		try
-		{
-			list = db.getStaff();
-
-			data = new Object[list.size()][columnNames.length];
-//			for (int i=0; i<list.size(); i++) {
-//				data[i][0] = list.get(i).getTitle();
-//				data[i][1] = list.get(i).getYear();
-//				data[i][2] = list.get(i).getLength();
-//				data[i][3] = list.get(i).getGenre();
-//				data[i][4] = list.get(i).getStudioName();
-//
-//			}
-			
-		} catch (SQLException e)
-		{
-			e.printStackTrace();
-		}
 		createComponents();
 		setVisible(true);
 		setSize(500, 550);
@@ -341,6 +327,8 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 			this.repaint();
 		} else if (e.getSource() == btnAddLot){
 			addLot();
+		} else if (e.getSource() == btnAddStaff){
+			addStaff();
 		}
 //		else if (e.getSource() == btnSaveVisitorRes) {
 //			// Need to change this shit up
@@ -371,7 +359,80 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 //		}
 		
 	}
-	
+
+	private void addVisitorRes(){
+		int newSpaceID = 0;
+		int newStaffID = 0;
+		Date newDate = null;
+
+		if (txfVisit[0].getText().length() != 0) {
+			try {
+				newSpaceID = Integer.parseInt(txfVisit[0].getText());
+			} catch (NumberFormatException e ) {
+				JOptionPane.showMessageDialog(this, "Invalid input for spaceID");
+			}
+		}
+		if (txfVisit[2].getText().length() != 0) {
+			try {
+				newStaffID = Integer.parseInt(txfVisit[2].getText());
+			} catch (NumberFormatException e ) {
+				JOptionPane.showMessageDialog(this, "Invalid input for staffID");
+			}
+		}
+		String dateString = txfVisit[2].getText();
+		if (dateString.toCharArray()[5] != '-') {
+			newDate = java.sql.Date.valueOf(dateString);
+		}
+		String newLicense = txfVisit[3].getText();
+		VisitorReservation newVR = new VisitorReservation(newSpaceID, newDate, newStaffID, newLicense);
+		try{
+			ParkingDB.addVisitorReservation(newVR);
+		} catch (SQLException e) {
+			e.getMessage();
+		}
+	}
+
+	private void addStaff(){
+		int newStaffID = 0;
+		if (txfVisit[0].getText().length() != 0) {
+			try {
+				newStaffID = Integer.parseInt(txfVisit[0].getText());
+			} catch (NumberFormatException e ) {
+				JOptionPane.showMessageDialog(this, "Invalid input for staffID");
+			}
+		}
+		if (txfStaff[1].getText().length() < 2) {
+			JOptionPane.showMessageDialog(this, "Name too short");
+			return;
+		}
+		if (txfStaff[2].getText().length() < 2) {
+			JOptionPane.showMessageDialog(this, "Last name too short");
+			return;
+		}
+		if (txfStaff[3].getText().length() < 5) {
+			JOptionPane.showMessageDialog(this, "Telephone too short");
+			return;
+		}
+		if (txfStaff[4].getText().length() > 5) {
+			JOptionPane.showMessageDialog(this, "Extention too long");
+			return;
+		}
+		String FirstName = txfStaff[1].getText();
+		String LastName = txfStaff[2].getText();
+		String Telephone = txfStaff[3].getText();
+		String Extention = txfStaff[4].getText();
+		Staff newStaff = new Staff(newStaffID, FirstName,LastName,Telephone,Extention);
+		try {
+			ParkingDB.addStaff(newStaff);
+		} catch (SQLException e) {
+			e.getMessage();
+		}
+		JOptionPane.showMessageDialog(this, "Added Staff");
+		for (JTextField txf : txfStaff) {
+			txf.setText("");
+		}
+	}
+
 	private void addLot(){
 		//Converted int values
 		int capacity = 0;
