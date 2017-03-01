@@ -1,4 +1,3 @@
-
 public class ParkingLot {
 
 	private String LotName;
@@ -6,10 +5,10 @@ public class ParkingLot {
 	private int Capacity;
 	public ParkingLot(String lotName, String location, int capacity, int floors) {
 		super();
-		LotName = lotName;
-		Location = location;
-		Capacity = capacity;
-		Floors = floors;
+		setLotName(lotName);
+		setLocation(location);
+		setCapacity(capacity);
+		setFloors(floors);
 	}
 	private int Floors;
 	public String getLotName() {

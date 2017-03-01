@@ -19,8 +19,8 @@ import java.util.Properties;
 
 public class ParkingDB {
 	private static Connection conn;
-	private List<Staff> staffList;
-	private String userName = "concox"; //Change to yours
+	//private List<Staff> staffList;
+	private static String userName = "concox"; //Change to yours
 	/**
 	 * Creates a sql connection to MySQL using the properties for
 	 * user id, password and server information.
@@ -45,7 +45,7 @@ public class ParkingDB {
      * @return availParking a list of available parking.
      * @throws SQLException if an error occurs
      */
-    public List<Integer> getVisitorAvailParking(Date theSelectedDate) throws SQLException {
+    public static List<Integer> getVisitorAvailParking(Date theSelectedDate) throws SQLException {
         if (conn == null) {
             createConnection();
         }
@@ -76,7 +76,7 @@ public class ParkingDB {
      * @return availParking a list of available parking.
      * @throws SQLException if an error occurs
      */
-    public List<Integer> getStaffAvailParking() throws SQLException {
+    public static List<Integer> getStaffAvailParking() throws SQLException {
         if (conn == null) {
             createConnection();
         }
@@ -101,13 +101,14 @@ public class ParkingDB {
         }
         return availParking;
     }
+    
 
     /**
      * Returns a list of lot names.
      * @return lotNames list of names that the lots are named.
      * @throws SQLException if an error occurs
      */
-    public List<String> getLotNames() throws SQLException {
+    public static List<String> getLotNames() throws SQLException {
         if (conn == null) {
             createConnection();
         }
@@ -137,7 +138,7 @@ public class ParkingDB {
 	 * @return staffList staffList all the staff members in a list.
 	 * @throws SQLException if an error occurs
 	 */
-	public List<Staff> getStaff() throws SQLException {
+	public static List<Staff> getStaff() throws SQLException {
 		if (conn == null) {
 			createConnection();
 		}
@@ -145,7 +146,7 @@ public class ParkingDB {
 		String query = "select firstName, lastName, telephone, extention"
 				+ " from " + userName + ".Staff ";
 
-		staffList = new ArrayList<>();
+		ArrayList<Staff> staffList = new ArrayList<Staff>();
 		try {
 			stmt = conn.createStatement();
 			ResultSet rs = stmt.executeQuery(query);
@@ -173,7 +174,7 @@ public class ParkingDB {
      * @return staffResList holds staff reservation objects.
      * @throws SQLException if an error occurs
      */
-    public List<StaffReservation> getStaffRes() throws SQLException {
+    public static List<StaffReservation> getStaffRes() throws SQLException {
         if (conn == null) {
             createConnection();
         }
@@ -209,7 +210,7 @@ public class ParkingDB {
      * @return visiorResList holds visitor reservation objects.
      * @throws SQLException if an error occurs
      */
-    public List<VisitorReservation> getVisitorRes() throws SQLException {
+    public static List<VisitorReservation> getVisitorRes() throws SQLException {
         if (conn == null) {
             createConnection();
         }
@@ -243,7 +244,11 @@ public class ParkingDB {
 	 * @param theID id of the staff member to retrieve
 	 * @return a list of staff members with that id.
 	 */
-	public List<Staff> getStaff(int theID) {
+	public static List<Staff> getStaff(int theID) throws SQLException {
+		if (conn == null) {
+            createConnection();
+        }
+		List<Staff> staffList = new ArrayList<Staff>();
 		List<Staff> filterList = new ArrayList<>();
 		try {
 			staffList = getStaff();
@@ -262,7 +267,10 @@ public class ParkingDB {
 	 * Adds a new staff member to the table.
 	 * @param theStaff a staff member to add.
 	 */
-	public void addStaff(Staff theStaff) {
+	public static void addStaff(Staff theStaff)  throws SQLException {
+		if (conn == null) {
+            createConnection();
+        }
 		String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?, ?, ?, ?); ";
 
 		PreparedStatement preparedStatement;
@@ -284,8 +292,11 @@ public class ParkingDB {
      * Adds a new staff reservation to the database.
      * @param theSR a staff reservation to add.
      */
-    public void addStaffReservation(StaffReservation theSR) {
-        String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?, ?, ?); ";
+    public static void addStaffReservation(StaffReservation theSR) throws SQLException {
+    	if (conn == null) {
+            createConnection();
+        }
+    	String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?, ?, ?); ";
 
         PreparedStatement preparedStatement;
         try {
@@ -305,8 +316,11 @@ public class ParkingDB {
      * Adds a new visitor reservation to the table.
      * @param theVR a visitor reservation to add.
      */
-    public void addVisitorReservation(VisitorReservation theVR) {
-        String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?, ?); ";
+    public static void addVisitorReservation(VisitorReservation theVR) throws SQLException {
+    	if (conn == null) {
+            createConnection();
+        }
+    	String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?, ?); ";
 
         PreparedStatement preparedStatement;
         try {
@@ -325,8 +339,11 @@ public class ParkingDB {
      * Adds a new parking space to the table.
      * @param theParkingSpace a parking space to add.
      */
-    public void addParkingSpace(ParkingSpace theParkingSpace) {
-        String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?); ";
+    public static void addParkingSpace(ParkingSpace theParkingSpace) throws SQLException {
+    	if (conn == null) {
+            createConnection();
+        }
+    	String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?); ";
 
         PreparedStatement preparedStatement;
         try {
@@ -344,8 +361,11 @@ public class ParkingDB {
      * Adds a new parking lot to the table.
      * @param theParkingLot a parking lot to add.
      */
-    public void addParkingLot(ParkingLot theParkingLot) {
-        String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?, ?); ";
+    public static void addParkingLot(ParkingLot theParkingLot) throws SQLException {
+    	if (conn == null) {
+            createConnection();
+        }
+    	String sql = "INSERT INTO " + userName + ".ParkingLot VALUES " + "(?, ?, ?, ?); ";
 
         PreparedStatement preparedStatement;
         try {
@@ -353,8 +373,9 @@ public class ParkingDB {
             preparedStatement.setString(1, theParkingLot.getLotName());
             preparedStatement.setString(2, theParkingLot.getLocation());
             preparedStatement.setInt(3, theParkingLot.getCapacity());
-            preparedStatement.setFloat(4, theParkingLot.getFloors());
+            preparedStatement.setInt(4, theParkingLot.getFloors());
             preparedStatement.executeUpdate();
+            System.out.println("Lot added");
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -366,8 +387,10 @@ public class ParkingDB {
      * @param theExtention the new extention
      * @param theLicenseNumber the new license number
      */
-    public void updateMovie(int theStaffID, String theExtention, String theLicenseNumber) {
-
+    public static void updateMovie(int theStaffID, String theExtention, String theLicenseNumber) throws SQLException {
+    	if (conn == null) {
+            createConnection();
+        }
         String sql = "update " + userName + ".Staff set extention = ?, licenseNumber = ? where staffID =" + theStaffID;
         System.out.println(sql);
         PreparedStatement preparedStatement = null;

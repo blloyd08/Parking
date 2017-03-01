@@ -3,6 +3,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -136,7 +137,7 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 		pnlLotSpace.add(lotHeading);
 		
 		String[] lotColNames = {"Lot Name: ", "Location: ", "Capacity: ",
-				"Floors: ", "Extension: ", "License Number: "};
+				"Floors: "};
 		lblLot = new JLabel[lotColNames.length];
 		txfLot = new JTextField[lotColNames.length];
 		for (int i = 0; i< lotColNames.length; i++) {
@@ -159,6 +160,7 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 		spaceHeading.setHorizontalAlignment(JLabel.CENTER);
 		pnlLotSpace.add(spaceHeading);
 		
+		//belowCapacityLots = (String[])getBelowCapacityLots().toArray();
 		String[] spaceColNames = {"Lot: ", "Type: "};
 		lblSpace = new JLabel[spaceColNames.length];
 		cmbSpace = new JComboBox[spaceColNames.length];
@@ -336,6 +338,8 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 			pnlParking.add(pnlStaffRes);
 			pnlParking.revalidate();
 			this.repaint();
+		} else if (e.getSource() == btnAddLot){
+			addLot();
 		}
 //		else if (e.getSource() == btnSaveVisitorRes) {
 //			// Need to change this shit up
@@ -365,6 +369,71 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 //			}
 //		}
 		
+	}
+	
+	private void addLot(){
+		//Converted int values
+		int capacity = 0;
+		int floors = 0;
+		
+		//Validate input (Required fields)
+		for (int i = 0; i < txfLot.length; i++){
+			System.out.println(txfLot[i].getText().compareTo(""));
+			//Check floors attribute
+			if (i == 3){
+				if (txfLot[i].getText().compareTo("") ==0){
+					txfLot[i].setText("0");
+					floors = 0;
+				} else{
+					try {
+						floors = Integer.parseInt(txfLot[i].getText());
+					} catch (Exception e){
+						JOptionPane.showMessageDialog(this, "Invalid input for floors");
+						return;
+					}
+				}
+				continue;
+			}
+			
+			//Check required fields
+			if (txfLot[i].getText().compareTo("") ==0){
+				String errorLabel = lblLot[i].getText().split(":")[0];
+				JOptionPane.showMessageDialog(this, "Invalid input for " + errorLabel);
+				return;
+			}
+			
+			//Check Capacity is number
+			if (i == 2){
+				try {
+					capacity = Integer.parseInt(txfLot[i].getText());
+				} catch (Exception e){
+					JOptionPane.showMessageDialog(this, "Invalid input for capacity");
+					return;
+				}
+			}
+		}
+		try {
+			ParkingLot lot = new ParkingLot(txfLot[0].getText(), txfLot[1].getText(),capacity,floors);
+			ParkingDB.addParkingLot(lot);
+			System.out.println("Lot created");
+		}catch (SQLException sqlE){
+			JOptionPane.showMessageDialog(this, sqlE.getMessage());
+			
+		}catch (Exception e){
+			JOptionPane.showMessageDialog(this, e.getMessage());
+			return;
+		}		
+	}
+	
+	private List<String> getBelowCapacityLots(){
+		List<String> spaceLots = new ArrayList<String>();
+		try{
+			//spaceLots = ParkingDB.getBelowCapacityLotNames();
+		} catch (Exception e){
+			JOptionPane.showMessageDialog(this, "Lots for parking spaces could not be loaded,"
+					+ " only below capacity lots are displayed");
+		}
+		return spaceLots;
 	}
 
 	/**

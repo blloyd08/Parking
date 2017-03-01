@@ -7,7 +7,7 @@ CREATE TABLE ParkingLot(
 	lotName VARCHAR(100) PRIMARY KEY,
 	location VARCHAR(100) NOT NULL,
 	capacity INT NOT NULL,
-	floors FLOAT
+	floors INT
 );
 
 CREATE TABLE SpaceType (
@@ -26,7 +26,7 @@ CREATE TABLE Staff (
 	lastName VARCHAR(50) NOT NULL,
 	telephone CHAR(13) NOT NULL,
 	extention VARCHAR(6),
-	licenseNumber VARCHAR(8)
+	licenseNumber VARCHAR(8) NOT NULL
 );
 
 CREATE TABLE StaffReservation (
