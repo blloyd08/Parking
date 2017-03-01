@@ -367,7 +367,7 @@ public class ParkingDB {
      */
     public void updateMovie(int theStaffID, String theExtention, String theLicenseNumber) {
 
-        String sql = "update youruwnetid.Staff set extention = ? and set licenseNumber = ? where staffID =" + theStaffID;
+        String sql = "update youruwnetid.Staff set extention = ?, licenseNumber = ? where staffID =" + theStaffID;
         System.out.println(sql);
         PreparedStatement preparedStatement = null;
         try {
