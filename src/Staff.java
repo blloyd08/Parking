@@ -19,24 +19,38 @@ public class Staff {
 		return StaffID;
 	}
 	public void setStaffID(int staffID) {
-		StaffID = staffID;
+		if (staffID >= 0){
+			StaffID = staffID;
+		} else{
+			throw new IllegalArgumentException();
+		}
+		
 	}
 	public String getFirstName() {
 		return FirstName;
 	}
 	public void setFirstName(String firstName) {
+		if (firstName == null){
+			throw new IllegalArgumentException();
+		}
 		FirstName = firstName;
 	}
 	public String getLastName() {
 		return LastName;
 	}
 	public void setLastName(String lastName) {
+		if (lastName == null){
+			throw new IllegalArgumentException();
+		}
 		LastName = lastName;
 	}
 	public String getTelephone() {
 		return Telephone;
 	}
 	public void setTelephone(String telephone) {
+		if (telephone == null){
+			throw new IllegalArgumentException();
+		}
 		Telephone = telephone;
 	}
 	public String getExtention() {

@@ -13,6 +13,9 @@ public class SpaceType {
 	}
 
 	public void setName(String name) {
+		if (name == null){
+			throw new IllegalArgumentException("Space type name can't be null");
+		}
 		Name = name;
 	}
 }
