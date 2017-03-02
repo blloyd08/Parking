@@ -10,12 +10,12 @@ public class VisitorReservation {
 	public int getSpaceID() {
 		return SpaceID;
 	}
-	public VisitorReservation(int spaceID, Date reservedDay, int staffID, String license) {
+	public VisitorReservation(int spaceID, int staffID, String license) {
 		super();
-		SpaceID = spaceID;
-		ReservedDay = reservedDay;
-		StaffID = staffID;
-		License = license;
+		setSpaceID(spaceID);
+		ReservedDay = new Date(Calendar.getInstance().getTime().getTime());
+		setStaffID(staffID);
+		setLicense(license);
 	}
 	public void setSpaceID(int spaceID) {
 		if (spaceID < 0){
@@ -46,7 +46,10 @@ public class VisitorReservation {
 	public String getLicense() {
 		return License;
 	}
-	public void setLicense(String license) {
+	public void setLicense(String license) throws IllegalArgumentException {
+		if (license == null || license.compareTo("") == 0){
+			throw new IllegalArgumentException("Visitor reservation license plate is invalid");
+		}
 		License = license;
 	}
 }

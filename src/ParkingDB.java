@@ -45,29 +45,25 @@ public class ParkingDB {
      * @return availParking a list of available parking.
      * @throws SQLException if an error occurs
      */
-    public static List<Integer> getVisitorAvailParking(Date theSelectedDate) throws SQLException {
+    public static List<Integer> getVisitorAvailParking() throws SQLException {
         if (conn == null) {
             createConnection();
         }
         Statement stmt = null;
-        String query = "select * from VisitorSpaces V where V.spaceID not in (select spaceID from VisitorReservation) " +
-                "where reservedDay !=" + theSelectedDate + ")";
+        String query = "SELECT * FROM " + userName + ".UnregisteredVisitorSpaces";
+//        		"select * from VisitorSpaces V where V.spaceID not in (select spaceID from VisitorReservation) " +
+//                "where reservedDay !=" + theSelectedDate + ")";
 
         ArrayList<Integer> availParking = new ArrayList<>();
-        try {
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
                 int spaceID = rs.getInt("spaceID");
                 availParking.add(spaceID);
             }
-        } catch (SQLException e) {
-            System.out.println(e);
-        } finally {
             if (stmt != null) {
                 stmt.close();
             }
-        }
         return availParking;
     }
 
@@ -121,20 +117,15 @@ public class ParkingDB {
         	    "OR capacity > Spaces";
 
         ArrayList<String> lotNames = new ArrayList<>();
-        try {
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
                 String lotName = rs.getString("lotName");
                 lotNames.add(lotName);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
             if (stmt != null) {
                 stmt.close();
             }
-        }
         return lotNames;
     }
 
@@ -261,7 +252,7 @@ public class ParkingDB {
                 Date startDate = rs.getDate("reservedDay");
                 int staffID = rs.getInt("staffID");
                 String licenseNumber = rs.getString("licenseNumber");
-                VisitorReservation vr = new VisitorReservation(spaceID, startDate, staffID, licenseNumber);
+                VisitorReservation vr = new VisitorReservation(spaceID, staffID, licenseNumber);
                 visitorResList.add(vr);
             }
         } catch (SQLException e) {
@@ -355,7 +346,7 @@ public class ParkingDB {
     	if (conn == null) {
             createConnection();
         }
-    	String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?, ?); ";
+    	String sql = "insert into " + userName + ".VisitorReservation values " + "(?, ?, ?, ?); ";
 
         PreparedStatement preparedStatement;
         try {
