@@ -378,18 +378,13 @@ public class ParkingDB {
     	if (conn == null) {
             createConnection();
         }
-    	String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?); ";
+    	String sql = "INSERT INTO " + userName + ".ParkingSpace(lotName,spaceType) VALUES " + "(?, ?); ";
 
         PreparedStatement preparedStatement;
-        try {
             preparedStatement = conn.prepareStatement(sql);
-            preparedStatement.setInt(1, theParkingSpace.getSpaceID());
-            preparedStatement.setString(2, theParkingSpace.getLotName());
-            preparedStatement.setString(3, theParkingSpace.getType());
+            preparedStatement.setString(1, theParkingSpace.getLotName());
+            preparedStatement.setString(2, theParkingSpace.getType());
             preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -403,7 +398,6 @@ public class ParkingDB {
     	String sql = "INSERT INTO " + userName + ".ParkingLot VALUES " + "(?, ?, ?, ?); ";
 
         PreparedStatement preparedStatement;
-        try {
             preparedStatement = conn.prepareStatement(sql);
             preparedStatement.setString(1, theParkingLot.getLotName());
             preparedStatement.setString(2, theParkingLot.getLocation());
@@ -411,9 +405,6 @@ public class ParkingDB {
             preparedStatement.setInt(4, theParkingLot.getFloors());
             preparedStatement.executeUpdate();
             System.out.println("Lot added");
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     /**

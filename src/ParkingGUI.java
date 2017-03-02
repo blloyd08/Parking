@@ -22,7 +22,7 @@ import javax.swing.table.TableModel;
  * @author mmuppa
  *
  */
-public class ParkingGUI extends JFrame implements ActionListener, TableModelListener
+public class ParkingGUI extends JFrame implements ActionListener
 {
 	
 	private static final long serialVersionUID = 1779520078061383929L;
@@ -147,7 +147,6 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 		spaceHeading.setHorizontalAlignment(JLabel.CENTER);
 		pnlLotSpace.add(spaceHeading);
 		
-		belowCapacityLots = getBelowCapacityLots();
 		String[] spaceColNames = {"Lot: ", "Type: "};
 		lblSpace = new JLabel[spaceColNames.length];
 		cmbSpace = new JComboBox[spaceColNames.length];
@@ -155,7 +154,7 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 			JPanel panel = new JPanel();
 			lblSpace[i] = new JLabel(spaceColNames[i]);
 			if (i == 0){
-				cmbSpace[i] = new JComboBox<String>(belowCapacityLots);
+				cmbSpace[i] = new JComboBox<String>();
 			} else {
 				cmbSpace[i] = new JComboBox<String>(spaceType);
 			}
@@ -163,6 +162,8 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 			panel.add(cmbSpace[i]);
 			pnlLotSpace.add(panel);
 		}
+		
+		refreshParkingSpaceLotCmb();
 		
 		btnPanel = new JPanel();
 		btnAddSpace = new JButton("Add Space");
@@ -288,27 +289,6 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 			pnlParking.add(pnlLotSpace);
 			pnlParking.revalidate();
 			this.repaint();
-//			try {
-//				list = db.getStaff();
-//			} catch (SQLException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
-//			data = new Object[list.size()][columnNames.length];
-//			for (int i=0; i<list.size(); i++) {
-//				data[i][0] = list.get(i).getTitle();
-//				data[i][1] = list.get(i).getYear();
-//				data[i][2] = list.get(i).getLength();
-//				data[i][3] = list.get(i).getGenre();
-//				data[i][4] = list.get(i).getStudioName();
-////			}
-//			pnlParking.removeAll();
-//			table = new JTable(data, columnNames);
-//			table.getModel().addTableModelListener(this);
-//			scrollPane = new JScrollPane(table);
-//			pnlParking.add(scrollPane);
-//			pnlParking.revalidate();
-//			this.repaint();
 			
 		} else if (e.getSource() == btnSearch) {
 			pnlParking.removeAll();
@@ -329,34 +309,9 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 			addLot();
 		} else if (e.getSource() == btnAddStaff){
 			addStaff();
+		} else if (e.getSource() == btnAddSpace){
+			addSpace();
 		}
-//		else if (e.getSource() == btnSaveVisitorRes) {
-//			// Need to change this shit up
-//			String title = txfVisit[1].getText();
-//			if (title.length() > 0) {
-//				list = db.getStaff(1234);
-//				data = new Object[list.size()][columnNames.length];
-//				for (int i=0; i<list.size(); i++) {
-//					data[i][0] = list.get(i).getTitle();
-//					data[i][1] = list.get(i).getYear();
-//					data[i][2] = list.get(i).getLength();
-//					data[i][3] = list.get(i).getGenre();
-//					data[i][4] = list.get(i).getStudioName();
-//				}
-//				pnlParking.removeAll();
-//				table = new JTable(data, columnNames);
-//				table.getModel().addTableModelListener(this);
-//				scrollPane = new JScrollPane(table);
-//				pnlParking.add(scrollPane);
-//				pnlParking.revalidate();
-//				this.repaint();
-//			}
-//		} else if (e.getSource() == btnAddStaff) {
-//			JOptionPane.showMessageDialog(null, "Added Successfully!");
-//			for (int i=0; i<txfStaff.length; i++) {
-//				txfStaff[i].setText("");
-//			}
-//		}
 		
 	}
 
@@ -475,9 +430,14 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 			}
 		}
 		try {
+			//Add lot
 			ParkingLot lot = new ParkingLot(txfLot[0].getText(), txfLot[1].getText(),capacity,floors);
 			ParkingDB.addParkingLot(lot);
-			System.out.println("Lot created");
+			refreshParkingSpaceLotCmb();
+			for (JTextField tf : txfLot){
+				tf.setText("");
+			}
+			JOptionPane.showMessageDialog(this, "Lot added");
 		}catch (SQLException sqlE){
 			JOptionPane.showMessageDialog(this, sqlE.getMessage());
 			
@@ -485,6 +445,26 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 			JOptionPane.showMessageDialog(this, e.getMessage());
 			return;
 		}		
+	}
+	
+	private void addSpace(){
+		String lotName = (String)cmbSpace[0].getSelectedItem();
+		String spaceType = (String)cmbSpace[1].getSelectedItem();
+		try{
+			ParkingSpace space = new ParkingSpace(lotName, spaceType);
+			ParkingDB.addParkingSpace(space);
+			JOptionPane.showMessageDialog(this, "Parking space added succesffuly and can now"
+					+ " be found in reservation combo boxes");
+		} catch (Exception e){
+			JOptionPane.showMessageDialog(this, e.getMessage());
+		}
+		
+	}
+	
+	private void refreshParkingSpaceLotCmb(){
+		String[] lotNames = getBelowCapacityLots();
+		DefaultComboBoxModel lotsModel = new DefaultComboBoxModel(lotNames);
+		cmbSpace[0].setModel(lotsModel);
 	}
 	
 	private String[] getBelowCapacityLots(){
@@ -504,20 +484,6 @@ public class ParkingGUI extends JFrame implements ActionListener, TableModelList
 		} else {
 			return new String[0];
 		}
-	}
-
-	/**
-	 * Event handling for any cell being changed in the table.
-	 */
-	@Override
-	public void tableChanged(TableModelEvent e) {
-		int row = e.getFirstRow();
-        int column = e.getColumn();
-        TableModel model = (TableModel)e.getSource();
-        String columnName = model.getColumnName(column);
-        Object data = model.getValueAt(row, column);
-
-
 	}
 
 }

@@ -1,15 +1,15 @@
 
 public class ParkingSpace {
 
-	public ParkingSpace(int spaceID, String lotName, String type) {
+	public ParkingSpace(String lotName, String type) {
 		super();
-		SpaceID = spaceID;
-		LotName = lotName;
-		Type = type;
+		setLotName(lotName);
+		setType(type);
 	}
 	private int SpaceID;
 	private String LotName;
 	private String Type;
+	
 	public int getSpaceID() {
 		return SpaceID;
 	}
