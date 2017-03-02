@@ -77,24 +77,20 @@ public class ParkingDB {
             createConnection();
         }
         Statement stmt = null;
-        String query = "select * from ParkingSpace where spaceID not in (select spaceID from CurrentStaffReservation) " +
+        String query = "select * from "+ userName + ".ParkingSpace where spaceID not in "
+        		+ "(select spaceID from " + userName +".CurrentStaffReservation) " +
                 "and spaceType = 'Covered'";
 
         ArrayList<Integer> availParking = new ArrayList<>();
-        try {
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
                 int spaceID = rs.getInt("spaceID");
                 availParking.add(spaceID);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
             if (stmt != null) {
                 stmt.close();
             }
-        }
         return availParking;
     }
     
@@ -218,7 +214,8 @@ public class ParkingDB {
                 Date endDate = rs.getDate("endDate");
                 int staffID = rs.getInt("staffID");
                 Double rate = rs.getDouble("rate");
-                StaffReservation sr = new StaffReservation(spaceID, startDate, endDate, staffID, rate);
+                StaffReservation sr = new StaffReservation(spaceID, endDate, staffID, rate);
+                sr.setStartDate(startDate);
                 staffResList.add(sr);
             }
         } catch (SQLException e) {
@@ -322,10 +319,9 @@ public class ParkingDB {
     	if (conn == null) {
             createConnection();
         }
-    	String sql = "insert into " + userName + ".Staff values " + "(?, ?, ?, ?, ?); ";
+    	String sql = "insert into " + userName + ".StaffReservation values " + "(?, ?, ?, ?, ?); ";
 
         PreparedStatement preparedStatement;
-        try {
             preparedStatement = conn.prepareStatement(sql);
             preparedStatement.setInt(1, theSR.getSpaceID());
             preparedStatement.setDate(2, theSR.getStartDate());
@@ -333,9 +329,6 @@ public class ParkingDB {
             preparedStatement.setInt(4, theSR.getStaffID());
             preparedStatement.setDouble(5, theSR.getRate());
             preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
 
     /**

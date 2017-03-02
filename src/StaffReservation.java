@@ -4,14 +4,13 @@ import java.util.Calendar;
 public class StaffReservation {
 
 	private int SpaceID;
-	public StaffReservation(int spaceID, Date startDate,
-			Date endDate, int staffID, double rate) {
+	public StaffReservation(int spaceID, Date endDate, int staffID, double rate) {
 		super();
-		SpaceID = spaceID;
-		StartDate = startDate;
-		EndDate = endDate;
-		StaffID = staffID;
-		Rate = rate;
+		setSpaceID(spaceID);
+		StartDate = new Date(Calendar.getInstance().getTime().getTime());
+		setEndDate(endDate);
+		setStaffID(staffID);
+		setRate(rate);
 	}
 	private Date StartDate;
 	private Date EndDate;
@@ -42,7 +41,7 @@ public class StaffReservation {
 		return EndDate;
 	}
 	public void setEndDate(Date endDate) {
-		if (endDate.compareTo(this.StartDate) > 0){
+		if (this.StartDate.compareTo(endDate) > 0){
 			throw new IllegalArgumentException("Staff reservation end date must be after start date");
 		}
 		EndDate = endDate;
