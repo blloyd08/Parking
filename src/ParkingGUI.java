@@ -275,7 +275,6 @@ public class ParkingGUI extends JFrame implements ActionListener
 	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		System.out.println("Button click" + e.getSource().toString());
 		if (e.getSource() == btnList) {
 			pnlParking.removeAll();
 			pnlParking.add(pnlLotSpace);
