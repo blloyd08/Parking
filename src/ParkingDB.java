@@ -13,7 +13,7 @@ import java.util.Properties;
  * A class that consists of the database operations to insert and update the database information.
  * @author mmuppa
  * @author concox
- * @author bbloyd
+ * @author blloyd08
  * This is going to work
  */
 
@@ -45,21 +45,32 @@ public class ParkingDB {
      * @return availParking a list of available parking.
      * @throws SQLException if an error occurs
      */
-    public static List<Integer> getVisitorAvailParking() throws SQLException {
+    public static List<ParkingSpace> getVisitorAvailParking() throws SQLException {
         if (conn == null) {
             createConnection();
         }
         Statement stmt = null;
-        String query = "SELECT * FROM " + userName + ".UnregisteredVisitorSpaces";
-        ArrayList<Integer> availParking = new ArrayList<>();
-            stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-            while (rs.next()) {
-                int spaceID = rs.getInt("spaceID");
-                availParking.add(spaceID);
-            }
-            stmt.close();
-        return availParking;
+        String query = "SELECT spaceID, lotName, spaceType FROM " + userName + ".UnregisteredVisitorSpaces";
+        stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(query);
+        return createParkingSpaces(rs);
+    }
+    
+    /**
+     * Creates a list of ParkingSpace objects represented in a result set
+     * @param rs result set containing data on  parking spaces
+     * @return List of ParkingSpace objects created from the result set
+     * @throws SQLException
+     */
+    private static List<ParkingSpace> createParkingSpaces(ResultSet rs) throws SQLException{
+    	ArrayList<ParkingSpace> spaces = new ArrayList<>();
+        while (rs.next()) {
+            int spaceID = rs.getInt("spaceID");
+            String lotName = rs.getString("lotName");
+            String spaceType = rs.getString("spaceType");
+            spaces.add(new ParkingSpace(spaceID, lotName, spaceType));
+        }
+    return spaces;
     }
 
     /**
@@ -67,7 +78,7 @@ public class ParkingDB {
      * @return availParking a list of available parking.
      * @throws SQLException if an error occurs
      */
-    public static List<Integer> getStaffAvailParking() throws SQLException {
+    public static List<ParkingSpace> getStaffAvailParking() throws SQLException {
         if (conn == null) {
             createConnection();
         }
@@ -76,15 +87,10 @@ public class ParkingDB {
         		+ "(select spaceID from " + userName +".CurrentStaffReservation) " +
                 "and spaceType = 'Covered'";
 
-        ArrayList<Integer> availParking = new ArrayList<>();
-            stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-            while (rs.next()) {
-                int spaceID = rs.getInt("spaceID");
-                availParking.add(spaceID);
-            }
-        stmt.close();
-        return availParking;
+        stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(query);
+            
+        return createParkingSpaces(rs);
     }
     
     /**
@@ -92,30 +98,37 @@ public class ParkingDB {
      * @return lotNames list of names that the lots are named.
      * @throws SQLException if an error occurs
      */
-    public static List<String> getLotNamesBelowCapacity() throws SQLException {
+    public static List<ParkingLot> getLotNamesBelowCapacity() throws SQLException {
         if (conn == null) {
             createConnection();
         }
         Statement stmt = null;
-        String query =     
-        	    "SELECT P.lotName " +
-        	    "FROM concox.ParkingLot P "+
-        	    "LEFT JOIN concox.LotCounts C " +
-        	    "ON P.lotName = C.lotName " +
-        	    "WHERE Spaces IS NULL " +
-        	    "OR capacity > Spaces";
+        String query = "SELECT lotName, location, capacity, floors FROM " + userName + ".UnfilledLots";
+        stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(query);
+        return createLots(rs);
+    }
+    
+    /**
+     * Returns a list of space types
+     * @return lotNames list of space types that can be assigned to spaces
+     * @throws SQLException if an error occurs
+     */
+    public static List<SpaceType> getSpaceTypes() throws SQLException {
+        if (conn == null) {
+            createConnection();
+        }
+        Statement stmt = null;
+        String query = "SELECT `name` FROM " + userName +".SpaceType";
 
-        ArrayList<String> lotNames = new ArrayList<>();
+        ArrayList<SpaceType> spaceTypes = new ArrayList<>();
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
-                String lotName = rs.getString("lotName");
-                lotNames.add(lotName);
+                String name = rs.getString("name");
+                spaceTypes.add(new SpaceType(name));
             }
-            if (stmt != null) {
-                stmt.close();
-            }
-        return lotNames;
+        return spaceTypes;
     }
 
     /**
@@ -123,30 +136,60 @@ public class ParkingDB {
      * @return lotNames list of names that the lots are named.
      * @throws SQLException if an error occurs
      */
-    public static List<String> getLotNames() throws SQLException {
+    public static List<ParkingLot> getLots() throws SQLException {
         if (conn == null) {
             createConnection();
         }
         Statement stmt = null;
-        String query = "select lotName from ParkingLot";
+        String query = "SELECT lotName, location, capacity, floors from " + userName + ".ParkingLot";
 
-        ArrayList<String> lotNames = new ArrayList<>();
-        try {
-            stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-            while (rs.next()) {
-                String lotName = rs.getString("lotName");
-                lotNames.add(lotName);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (stmt != null) {
-                stmt.close();
-            }
-        }
-        return lotNames;
+        stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(query);
+            
+        return createLots(rs);
     }
+    
+    private static List<ParkingLot> createLots(ResultSet rs) throws SQLException{
+    	ArrayList<ParkingLot> lots = new ArrayList<>();
+        while (rs.next()) {
+            String lotName = rs.getString("lotName");
+            String location = rs.getString("location");
+            int capacity = rs.getInt("capacity");
+            int floors = rs.getInt("floors");
+            lots.add(new ParkingLot(lotName, location, capacity, floors));
+        }
+    return lots;
+    }
+    
+//    /**
+//     * Returns a list of lot names.
+//     * @return lotNames list of names that the lots are named.
+//     * @throws SQLException if an error occurs
+//     */
+//    public static List<String> getLotNames() throws SQLException {
+//        if (conn == null) {
+//            createConnection();
+//        }
+//        Statement stmt = null;
+//        String query = "select lotName from ParkingLot";
+//
+//        ArrayList<String> lotNames = new ArrayList<>();
+//        try {
+//            stmt = conn.createStatement();
+//            ResultSet rs = stmt.executeQuery(query);
+//            while (rs.next()) {
+//                String lotName = rs.getString("lotName");
+//                lotNames.add(lotName);
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        } finally {
+//            if (stmt != null) {
+//                stmt.close();
+//            }
+//        }
+//        return lotNames;
+//    }
 
 	/**
 	 * Returns a list of staff objects.
@@ -158,31 +201,33 @@ public class ParkingDB {
 			createConnection();
 		}
 		Statement stmt = null;
-		String query = "select staffID, firstName, lastName, telephone, extention"
+		String query = "select staffID, firstName, lastName, telephone, extention, licenseNumber"
 				+ " from " + userName + ".Staff ";
+		stmt = conn.createStatement();
+		ResultSet rs = stmt.executeQuery(query);
 
-		ArrayList<Staff> staffList = new ArrayList<Staff>();
-		try {
-			stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(query);
-			while (rs.next()) {
-				int staffID = rs.getInt("staffID");
-				String firstName = rs.getString("firstName");
-                String lastName = rs.getString("lastName");
-                String telephone = rs.getString("telephone");
-                String extention = rs.getString("extention");
-                Staff staff = new Staff(staffID, firstName, lastName, telephone, extention);
-				staffList.add(staff);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		} finally {
-			if (stmt != null) {
-				stmt.close();
-			}
-		}
-		return staffList;
+		return createStaff(rs);
 	}
+	
+	/**
+     * Creates a list of Staff objects represented in a result set
+     * @param rs result set containing data on  staff
+     * @return List of Staff objects created from the result set
+     * @throws SQLException
+     */
+    private static List<Staff> createStaff(ResultSet rs) throws SQLException{
+    	ArrayList<Staff> spaces = new ArrayList<>();
+        while (rs.next()) {
+            int staffID = rs.getInt("staffID");
+            String firstName = rs.getString("firstName");
+            String lastName = rs.getString("lastName");
+            String telephone = rs.getString("telephone");
+            String ext = rs.getString("extention");
+            String license = rs.getString("licenseNumber");
+            spaces.add(new Staff(staffID, firstName, lastName, telephone, ext, license));
+        }
+    return spaces;
+    }
 
     /**
      * Returns a a list of reservations held by staff members.
@@ -239,7 +284,6 @@ public class ParkingDB {
             ResultSet rs = stmt.executeQuery(query);
             while (rs.next()) {
                 int spaceID = rs.getInt("spaceID");
-                Date startDate = rs.getDate("reservedDay");
                 int staffID = rs.getInt("staffID");
                 String licenseNumber = rs.getString("licenseNumber");
                 VisitorReservation vr = new VisitorReservation(spaceID, staffID, licenseNumber);

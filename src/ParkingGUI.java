@@ -6,7 +6,6 @@ import java.sql.Date;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import javax.swing.*;
@@ -25,34 +24,56 @@ public class ParkingGUI extends JFrame implements ActionListener {
     private JPanel pnlParking, pnlVisitor, pnlStaffRes, pnlLotSpace, pnlStaff;
     private JButton btnSaveVisitorRes, btnSaveStaffRes, btnAddLot, btnAddSpace, btnAddStaff, btnUpdateStaff;
     private JTextField[] txfLot, txfStaff, txfVisit, txfStaffRes;
-	private JComboBox cmbIDVisit, cmbIDStaffRes, cmbIDStaff, cmbParkVisit, cmbParkStaffRes;
+	private JComboBox<Staff> myCmbStaffForVisitorReservation;
+	private JComboBox<Staff> cmbIDStaffRes;
+	private JComboBox<Staff> cmbIDStaff;
+	private JComboBox<ParkingSpace> myCmbSpaceForVisitorReservation;
+	private JComboBox<ParkingSpace> cmbParkStaffRes;
 
-    private String[] currentStaff = {"1234", "5678", "9101R"};
-	private String[] spaceType = {"Free","Covered","Visitor"};
 	private JLabel[] lblLot;
-    private JComboBox[] cmbSpace;
+    private JComboBox<SpaceType> myCmbSpaceTypeForAddSpace;
+    private JComboBox<ParkingLot> myCmbLotsForAddSpace;
+    
+    private SpaceType[] mySpaceTypes = new SpaceType[3];
 
     /**
 	 * Creates the frame and components and launches the GUI.
 	 */
 	private ParkingGUI() {
 		super("Parking");
+		setSpaceTypes();
 		createComponents();
 		setVisible(true);
 		setSize(500, 550);
 	}
+	
+	/**
+	 * Retrieves all space type objects from the DB and converts the list to an array of SpaceType
+	 */
+	private void setSpaceTypes(){
+		try{
+			List<SpaceType> spaceTypes = ParkingDB.getSpaceTypes();
+			mySpaceTypes = new SpaceType[spaceTypes.size()];
+			spaceTypes.toArray(mySpaceTypes);
+		} catch (Exception e){
+			JOptionPane.showMessageDialog(this, e.getMessage());
+		}
+		
+	}
+	
+
     
 	/**
 	 * Creates panels for Movie list, search, add and adds the corresponding 
 	 * components to each panel.
 	 */
 	private void createComponents() {
-        JLabel[] lblSpace;
         JLabel[] lblStaff;
         JLabel[] lblVisit;
         JLabel[] lblStaffRes;
         JPanel pnlButtons;
 
+        //Add top buttons to select different panels
         pnlButtons = new JPanel();
 		btnList = new JButton("Parking");
 		btnList.addActionListener(this);
@@ -74,7 +95,6 @@ public class ParkingGUI extends JFrame implements ActionListener {
 		
 		//Parking Panel
 		pnlParking = new JPanel();
-		//pnlParking.setLayout(new GridLayout(7, 0));
 		
 		//Lot and Spaces
 		pnlLotSpace = new JPanel();
@@ -110,23 +130,22 @@ public class ParkingGUI extends JFrame implements ActionListener {
 		pnlLotSpace.add(spaceHeading);
 		
 		String[] spaceColNames = {"Lot: ", "Type: "};
-		lblSpace = new JLabel[spaceColNames.length];
-		cmbSpace = new JComboBox[spaceColNames.length];
+		JComponent[] controls = new JComponent[spaceColNames.length];
+		myCmbLotsForAddSpace = new JComboBox<ParkingLot>();
+		controls[0] = myCmbLotsForAddSpace;
+		myCmbSpaceTypeForAddSpace = new JComboBox<SpaceType>(mySpaceTypes);
+		controls[1] = myCmbSpaceTypeForAddSpace;
 		for (int i = 0; i< spaceColNames.length; i++) {
 			JPanel panel = new JPanel();
-			lblSpace[i] = new JLabel(spaceColNames[i]);
-			if (i == 0){
-				cmbSpace[i] = new JComboBox<>();
-			} else {
-				cmbSpace[i] = new JComboBox<>(spaceType);
-			}
-			panel.add(lblSpace[i]);
-			panel.add(cmbSpace[i]);
+			JLabel controlLabel = new JLabel(spaceColNames[i]);
+			panel.add(controlLabel);
+			panel.add(controls[i]);
 			pnlLotSpace.add(panel);
 		}
+		//Fill Lots Combo box
+		setAddParkingSpaceLots();
 		
-		refreshParkingSpaceLotCmb();
-		
+		//Add button to trigger add space
 		btnPanel = new JPanel();
 		btnAddSpace = new JButton("Add Space");
 		btnAddSpace.addActionListener(this);
@@ -146,18 +165,18 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			txfVisit[i] = new JTextField(25);
 			panel.add(lblVisit[i]);
 			if(i == 1) {
-				cmbIDVisit = new JComboBox(currentStaff);
-				panel.add(cmbIDVisit);
+				myCmbStaffForVisitorReservation = new JComboBox<Staff>();
+				panel.add(myCmbStaffForVisitorReservation);
 			} else if(i == 0) {
-				cmbParkVisit = new JComboBox();
-				panel.add(cmbParkVisit);
+				myCmbSpaceForVisitorReservation = new JComboBox<ParkingSpace>();
+				panel.add(myCmbSpaceForVisitorReservation);
 			} else {
 				panel.add(txfVisit[i]);
 			}
 			pnlVisitor.add(panel);
 		}
 
-		refreshVisitorSpacesCmb();
+		setAddVisitorReservationSpace();
 		
 		btnSaveVisitorRes = new JButton("Reserve");
 		btnSaveVisitorRes.addActionListener(this);
@@ -176,7 +195,7 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			txfStaff[i] = new JTextField(25);
 			panel.add(lblStaff[i]);
 			if(i == 0) {
-				cmbIDStaff = new JComboBox(currentStaff);
+				cmbIDStaff = new JComboBox<Staff>();
 				cmbIDStaff.setEditable(true);
 				panel.add(cmbIDStaff);
 			} else {
@@ -206,18 +225,18 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			txfStaffRes[i] = new JTextField(25);
 			newPanel.add(lblStaffRes[i]);
 			if(i == 2) {
-				cmbIDStaffRes = new JComboBox(currentStaff);
+				cmbIDStaffRes = new JComboBox<Staff>();
 				newPanel.add(cmbIDStaffRes);
 			} else if(i == 0) {
-				cmbParkStaffRes = new JComboBox();
+				cmbParkStaffRes = new JComboBox<ParkingSpace>();
 				newPanel.add(cmbParkStaffRes);
 			} else {
 				newPanel.add(txfStaffRes[i]);
 			}
 			pnlStaffRes.add(newPanel);
 		}
-        refreshStaffCmb();
-		refreshStaffReservationSpacesCmb();
+		setAllStaffCmb();
+		setAddStaffReservationSpace();
 		btnSaveStaffRes = new JButton("Reserve");
 		btnSaveStaffRes.addActionListener(this);
 		pnlStaffRes.add(btnSaveStaffRes);
@@ -243,8 +262,8 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			pnlParking.removeAll();
 			pnlParking.add(pnlLotSpace);
 			pnlParking.revalidate();
-            refreshStaffCmb();
-			refreshParkingSpaceLotCmb();
+			setAllStaffCmb();
+            setAddParkingSpaceLots();
 			this.repaint();
 			
 		} else if (e.getSource() == btnSaveVisitorRes){
@@ -254,20 +273,20 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			pnlParking.removeAll();
 			pnlParking.add(pnlVisitor);
 			pnlParking.revalidate();
-            refreshStaffCmb();
-			refreshVisitorSpacesCmb();
+			setAllStaffCmb();
+            setAddVisitorReservationSpace();
 			this.repaint();
 		} else if (e.getSource() == btnStaff) {
 			pnlParking.removeAll();
 			pnlParking.add(pnlStaff);
 			pnlParking.revalidate();
-            refreshStaffCmb();
+			setAllStaffCmb();
 			this.repaint();
 		} else if (e.getSource() == btnStaffRes) {
 			pnlParking.removeAll();
 			pnlParking.add(pnlStaffRes);
-			getStaffReservationSpaces();
-            refreshStaffCmb();
+			setAddStaffReservationSpace();
+			setAllStaffCmb();
 			pnlParking.revalidate();
 			this.repaint();
 		} else if (e.getSource() == btnAddLot){
@@ -327,13 +346,19 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			JOptionPane.showMessageDialog(this, "Extention too long");
 			return;
 		}
+		if (txfStaff[5].getText().length() < 2) {
+			JOptionPane.showMessageDialog(this, "License plate too short");
+			return;
+		}
 		String FirstName = txfStaff[1].getText();
 		String LastName = txfStaff[2].getText();
 		String Telephone = txfStaff[3].getText();
 		String Extention = txfStaff[4].getText();
-		Staff newStaff = new Staff(newStaffID, FirstName,LastName,Telephone,Extention);
+		String License = txfStaff[5].getText();
+		Staff newStaff = new Staff(newStaffID, FirstName,LastName,Telephone,Extention, License);
 		try {
 			ParkingDB.addStaff(newStaff);
+			setAllStaffCmb();
 		} catch (SQLException e) {
 			e.getMessage();
 		}
@@ -391,7 +416,7 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			//Add lot
 			ParkingLot lot = new ParkingLot(txfLot[0].getText(), txfLot[1].getText(),capacity,floors);
 			ParkingDB.addParkingLot(lot);
-			refreshParkingSpaceLotCmb();
+			setAddParkingSpaceLots();
 			for (JTextField tf : txfLot){
 				tf.setText("");
 			}
@@ -407,19 +432,19 @@ public class ParkingGUI extends JFrame implements ActionListener {
      */
 	private void addVisitorReservation(){
 		//Check if parking spaces are available
-		if (cmbParkVisit.getSelectedIndex() == -1){
+		if (myCmbSpaceForVisitorReservation.getSelectedIndex() == -1){
 			return;
 		}
-		String spaceIDStr =(String)cmbParkVisit.getSelectedItem();
-		int spaceID = Integer.parseInt(spaceIDStr);
-		String staffIDStr = (String)cmbIDVisit.getSelectedItem();
-		int staffID = Integer.parseInt(staffIDStr);
+		ParkingSpace space = (ParkingSpace) myCmbSpaceForVisitorReservation.getSelectedItem();
+		int spaceID = space.getSpaceID();
+		Staff staff = (Staff)myCmbStaffForVisitorReservation.getSelectedItem();
 		String license = txfVisit[2].getText();
 				
 		try{
-			VisitorReservation reservation = new VisitorReservation(spaceID, staffID, license);
+			VisitorReservation reservation = new VisitorReservation(spaceID, staff.getStaffID(), license);
 			ParkingDB.addVisitorReservation(reservation);
-			refreshVisitorSpacesCmb();
+			setAddVisitorReservationSpace();
+			txfVisit[2].setText("");
 			JOptionPane.showMessageDialog(this, "Visitor reservation added succesfully");
 		} catch (Exception e){
 			JOptionPane.showMessageDialog(this, e.getMessage());
@@ -435,10 +460,8 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			if (cmbParkStaffRes.getSelectedIndex() == -1){
 				return;
 			}
-			String spaceIDStr =(String)cmbParkStaffRes.getSelectedItem();
-			int spaceID = Integer.parseInt(spaceIDStr);
-			String staffIDStr = (String)cmbIDStaffRes.getSelectedItem();
-			int staffID = Integer.parseInt(staffIDStr);
+			ParkingSpace space = (ParkingSpace)cmbParkStaffRes.getSelectedItem();
+			Staff staff = (Staff)cmbIDStaffRes.getSelectedItem();
 			String endDateStr = txfStaffRes[1].getText();
 			String rateStr = txfStaffRes[3].getText();
 			Double rate;
@@ -460,10 +483,15 @@ public class ParkingGUI extends JFrame implements ActionListener {
 				JOptionPane.showMessageDialog(this, "Rate is not a valid decimal number");
 				return;
 			}
+			//Insert staff Reservation
 			try{
-				StaffReservation reservation = new StaffReservation(spaceID, endDate, staffID, rate);
+				StaffReservation reservation = new StaffReservation(space.getSpaceID(), endDate, staff.getStaffID(), rate);
 				ParkingDB.addStaffReservation(reservation);
-				refreshStaffReservationSpacesCmb();
+				//Refresh controls for next entry
+				setAllStaffCmb();
+				setAddStaffReservationSpace();
+				txfStaffRes[1].setText("");
+				txfStaffRes[3].setText("");
 				JOptionPane.showMessageDialog(this, "Staff reservation added successfully");
 			} catch (Exception e){
 				JOptionPane.showMessageDialog(this, e.getMessage());
@@ -475,151 +503,85 @@ public class ParkingGUI extends JFrame implements ActionListener {
      * inserts a parking space into the data base.
      */
 	private void addSpace(){
-		String lotName = (String)cmbSpace[0].getSelectedItem();
-		String spaceType = (String)cmbSpace[1].getSelectedItem();
+		ParkingLot lot = (ParkingLot)myCmbLotsForAddSpace.getSelectedItem();
+		SpaceType spaceType = (SpaceType)myCmbSpaceTypeForAddSpace.getSelectedItem();
 		try{
-			ParkingSpace space = new ParkingSpace(lotName, spaceType);
+			ParkingSpace space = new ParkingSpace(lot.getLotName(), spaceType.getName());
 			ParkingDB.addParkingSpace(space);
-			refreshParkingSpaceLotCmb();
-			JOptionPane.showMessageDialog(this, "Parking space added successfullyj and can now"
+			setAddParkingSpaceLots();
+			JOptionPane.showMessageDialog(this, "Parking space added successfully and can now"
 					+ " be found in reservation combo boxes");
 		} catch (Exception e){
 			JOptionPane.showMessageDialog(this, e.getMessage());
 		}
 		
 	}
-
-
-/**
-     * refreshes the combo boxes with new visitor spaces.
-     */
-	private void refreshStaffCmb(){
-		String[] staffID = getStaffIDs();
-		DefaultComboBoxModel spacesModel = new DefaultComboBoxModel(staffID);
-		cmbIDStaff.setModel(spacesModel);
-        cmbIDVisit.setModel(spacesModel);
-        cmbIDStaffRes.setModel(spacesModel);
-	}
-
-    /**
-     * refreshes the combo boxes with new visitor spaces.
-     */
-	private void refreshVisitorSpacesCmb(){
-		String[] visitorSpaces = getVisitorSpaces();
-		DefaultComboBoxModel spacesModel = new DefaultComboBoxModel(visitorSpaces);
-		cmbParkVisit.setModel(spacesModel);
-	}
-
-    /**
-     * Refreshes the combo boxes with new staff spaces.
-     */
-	private void refreshStaffReservationSpacesCmb(){
-		String[] spaceNames = getStaffReservationSpaces();
-		DefaultComboBoxModel spaceModels = new DefaultComboBoxModel(spaceNames);
-		cmbParkStaffRes.setModel(spaceModels);
-	}
-
-    /**
-     * Gets all the staff reservation spaces.
-     * @return a string array with all the spaces that are open to staff.
-     */
-	private String[] getStaffReservationSpaces(){
-		List<Integer> spaces = new ArrayList<Integer>();
+	
+	/**
+	 * Retrieves the Parking Spaces that aren't reserved today and adds them to the combo box
+	 * used to select a parking space for visitor reservation
+	 */
+	private void setAllStaffCmb(){
 		try{
-			spaces = ParkingDB.getStaffAvailParking();
+			List<Staff> staff = ParkingDB.getStaff();
+			Staff[] staffArray = new Staff[staff.size()];
+			staff.toArray(staffArray);
+			DefaultComboBoxModel<Staff> staffModel = new DefaultComboBoxModel<>(staffArray);
+			cmbIDStaff.setModel(staffModel);
+	        myCmbStaffForVisitorReservation.setModel(staffModel);
+	        cmbIDStaffRes.setModel(staffModel);
 		} catch (Exception e){
 			JOptionPane.showMessageDialog(this, e.getMessage());
 		}
-		if (spaces.size() > 0){
-			String[] staffSpaces = new String[spaces.size()];
-			for (int i = 0; i < spaces.size(); i++){
-				staffSpaces[i] = spaces.get(i).toString();
-			}
-			return staffSpaces;
-		} else {
-			JOptionPane.showMessageDialog(this, "Only staff reservation spaces not currently"
-					+ " reserved are displayed, no spaces found");
-			return new String[0];
-		}
 	}
-
-	 /**
-     * Gets all staff ids.
-     * @return a string array with all the staff ids.
-     */
-	private String[] getStaffIDs(){
-		List<Staff> staff = new ArrayList<>();
+	
+	
+	/**
+	 * Retrieves the Parking Spaces that aren't reserved today and adds them to the combo box
+	 * used to select a parking space for staff reservation
+	 */
+	private void setAddStaffReservationSpace(){
 		try{
-			staff = ParkingDB.getStaff();
+			List<ParkingSpace> spaces = ParkingDB.getStaffAvailParking();
+			ParkingSpace[] spaceArray = new ParkingSpace[spaces.size()];
+			spaces.toArray(spaceArray);
+			DefaultComboBoxModel<ParkingSpace> spaceModel = new DefaultComboBoxModel<>(spaceArray);
+			cmbParkStaffRes.setModel(spaceModel);
 		} catch (Exception e){
 			JOptionPane.showMessageDialog(this, e.getMessage());
 		}
-		if (staff.size() > 0){
-			String[] staffIDs = new String[staff.size()];
-			for (int i = 0; i < staff.size(); i++){
-				staffIDs[i] = "" + staff.get(i).getStaffID();
-			}
-			return staffIDs;
-		} else {
-			JOptionPane.showMessageDialog(this, "No Staff ID's found");
-			return new String[0];
-		}
 	}
-
-    /**
-     * Gets all available visitor spaces.
-     * @return a string array with all the spaces that are open to visitors.
-     */
-	private String[] getVisitorSpaces(){
-		List<Integer> spaces = new ArrayList<>();
+	
+	/**
+	 * Retrieves the Parking Spaces that aren't reserved today and adds them to the combo box
+	 * used to select a parking space for visitor reservation
+	 */
+	private void setAddVisitorReservationSpace(){
 		try{
-			spaces = ParkingDB.getVisitorAvailParking();
+			List<ParkingSpace> spaces = ParkingDB.getVisitorAvailParking();
+			ParkingSpace[] spaceArray = new ParkingSpace[spaces.size()];
+			spaces.toArray(spaceArray);
+			DefaultComboBoxModel<ParkingSpace> spaceModel = new DefaultComboBoxModel<>(spaceArray);
+			myCmbSpaceForVisitorReservation.setModel(spaceModel);
 		} catch (Exception e){
 			JOptionPane.showMessageDialog(this, e.getMessage());
 		}
-		if (spaces.size() > 0){
-			String[] visitorSpaces = new String[spaces.size()];
-			for (int i = 0; i < spaces.size(); i++){
-				visitorSpaces[i] = spaces.get(i).toString();
-			}
-			return visitorSpaces;
-		} else {
-			JOptionPane.showMessageDialog(this, "Only visitor spaces not currently"
-					+ " reserved are displayed, no spaces found");
-			return new String[0];
-		}
 	}
-
-    /**
-     * refreshes the combo boxes containing lots.
-     */
-	private void refreshParkingSpaceLotCmb(){
-		String[] lotNames = getBelowCapacityLots();
-		DefaultComboBoxModel lotsModel = new DefaultComboBoxModel(lotNames);
-		cmbSpace[0].setModel(lotsModel);
-	}
-
-    /**
-     * Gets the lots that have available parking.
-     * @return a string array containing the open lots
-     */
-	private String[] getBelowCapacityLots(){
-		List<String> spaceLots = new ArrayList<String>();
+	
+	
+	/**
+	 * Retrieves the Parking Lots that aren't at capacity from the DB and sets them to be used
+	 * on the Add Parking Space lots combo box
+	 */
+	private void setAddParkingSpaceLots(){
 		try{
-			spaceLots = ParkingDB.getLotNamesBelowCapacity();
+			List<ParkingLot> lots = ParkingDB.getLotNamesBelowCapacity();
+			ParkingLot[] lotsArray = new ParkingLot[lots.size()];
+			lots.toArray(lotsArray);
+			DefaultComboBoxModel<ParkingLot> lotsModel = new DefaultComboBoxModel<>(lotsArray);
+			myCmbLotsForAddSpace.setModel(lotsModel);
 		} catch (Exception e){
 			JOptionPane.showMessageDialog(this, e.getMessage());
-		}
-		if (spaceLots.size() > 0){
-			String[] lotNames = new String[spaceLots.size()];
-			for (int i = 0; i < spaceLots.size(); i++){
-				lotNames[i] = spaceLots.get(i);
-			}
-			return lotNames;
-		} else {
-			JOptionPane.showMessageDialog(this, "Only parking lots below capacity"
-					+ " are displayed, no unfilled lots found");
-			return new String[0];
 		}
 	}
 

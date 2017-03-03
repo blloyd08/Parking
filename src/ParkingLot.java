@@ -47,4 +47,9 @@ public class ParkingLot {
 		}
 		Floors = floors;
 	}
+	
+	@Override
+	public String toString(){
+		return LotName;
+	}
 }

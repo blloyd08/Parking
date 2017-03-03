@@ -7,14 +7,14 @@ public class Staff {
 	private String Telephone;
 	private String Extention;
 	private String License;
-	public Staff(int staffID, String firstName, String lastName, String telephone, String extention) {
+	public Staff(int staffID, String firstName, String lastName, String telephone, String extention, String license) {
 		super();
-		StaffID = staffID;
-		FirstName = firstName;
-		LastName = lastName;
-		Telephone = telephone;
-		Extention = extention;
-		License = null;
+		setStaffID(staffID);
+		setFirstName(firstName);
+		setLastName(lastName);
+		setTelephone(telephone);
+		setExtention(extention);
+		setLicense(license);
 	}
 	public int getStaffID() {
 		return StaffID;
@@ -65,5 +65,10 @@ public class Staff {
 	}
 	public void setLicense(String license) {
 		License = license;
+	}
+	
+	@Override
+	public String toString(){
+		return StaffID + "-" + FirstName + " " + LastName;
 	}
 }

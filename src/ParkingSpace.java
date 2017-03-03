@@ -6,6 +6,13 @@ public class ParkingSpace {
 		setLotName(lotName);
 		setType(type);
 	}
+	
+	public ParkingSpace(int spaceID, String lotName, String type) {
+		super();
+		setSpaceID(spaceID);
+		setLotName(lotName);
+		setType(type);
+	}
 	private int SpaceID;
 	private String LotName;
 	private String Type;
@@ -36,5 +43,10 @@ public class ParkingSpace {
 			throw new IllegalArgumentException("Parking space type can't be null");
 		}
 		Type = type;
-	}	
+	}
+	
+	@Override
+	public String toString(){
+		return SpaceID + " - Lot: " + LotName; 
+	}
 }

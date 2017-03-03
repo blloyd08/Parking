@@ -18,4 +18,8 @@ public class SpaceType {
 		}
 		Name = name;
 	}
+	
+	public String toString(){
+		return Name;
+	}
 }
