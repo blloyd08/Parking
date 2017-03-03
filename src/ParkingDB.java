@@ -388,4 +388,17 @@ public class ParkingDB {
             preparedStatement.executeUpdate();
             System.out.println("Lot added");
     }
+
+    public static Boolean updateStaff(int theStaffID, String theExtention, String theLic) throws SQLException {
+        if (conn == null) {
+            createConnection();
+        }
+        String sql = "UPDATE " + userName + ".Staff " +
+                     "SET extention = '" + theExtention + "', licenseNumber = '" + theLic +
+                     "' WHERE staffID = " + theStaffID + ";";
+        System.out.println(sql);
+        PreparedStatement preparedStatement = conn.prepareStatement(sql);
+        preparedStatement.executeUpdate();
+        return true;
+    }
 }

@@ -314,7 +314,18 @@ public class ParkingGUI extends JFrame implements ActionListener {
         } else {
             newExtention = txfStaff[4].getText();
             newLicense = txfStaff[5].getText();
-            staffID = Integer.parseInt(cmbIDStaff.getSelectedItem().toString());
+			String str = cmbIDStaff.getSelectedItem().toString();
+			String numberOnly= str.replaceAll("[^0-9]", "");
+            staffID = Integer.parseInt(numberOnly);
+			System.out.println(staffID);
+			try {
+				ParkingDB.updateStaff(staffID, newExtention, newLicense);
+				JOptionPane.showMessageDialog(this, "Staff updated");
+			} catch (SQLException eSQL) {
+				System.out.println(eSQL.getMessage());
+				JOptionPane.showMessageDialog(this, "Database error");
+
+			}
         }
     }
 
