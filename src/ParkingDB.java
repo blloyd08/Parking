@@ -51,9 +51,6 @@ public class ParkingDB {
         }
         Statement stmt = null;
         String query = "SELECT * FROM " + userName + ".UnregisteredVisitorSpaces";
-//        		"select * from VisitorSpaces V where V.spaceID not in (select spaceID from VisitorReservation) " +
-//                "where reservedDay !=" + theSelectedDate + ")";
-
         ArrayList<Integer> availParking = new ArrayList<>();
             stmt = conn.createStatement();
             ResultSet rs = stmt.executeQuery(query);
@@ -61,9 +58,7 @@ public class ParkingDB {
                 int spaceID = rs.getInt("spaceID");
                 availParking.add(spaceID);
             }
-            if (stmt != null) {
-                stmt.close();
-            }
+            stmt.close();
         return availParking;
     }
 
@@ -88,9 +83,7 @@ public class ParkingDB {
                 int spaceID = rs.getInt("spaceID");
                 availParking.add(spaceID);
             }
-            if (stmt != null) {
-                stmt.close();
-            }
+        stmt.close();
         return availParking;
     }
     
@@ -389,29 +382,5 @@ public class ParkingDB {
             preparedStatement.setInt(4, theParkingLot.getFloors());
             preparedStatement.executeUpdate();
             System.out.println("Lot added");
-    }
-
-    /**
-     * Modifies the staff's data to be updated with the new information.
-     * @param theStaffID the staff member to modify
-     * @param theExtention the new extention
-     * @param theLicenseNumber the new license number
-     */
-    public static void updateMovie(int theStaffID, String theExtention, String theLicenseNumber) throws SQLException {
-    	if (conn == null) {
-            createConnection();
-        }
-        String sql = "update " + userName + ".Staff set extention = ?, licenseNumber = ? where staffID =" + theStaffID;
-        System.out.println(sql);
-        PreparedStatement preparedStatement = null;
-        try {
-            preparedStatement = conn.prepareStatement(sql);
-            preparedStatement.setString(1, theExtention);
-            preparedStatement.setString(2, theLicenseNumber);
-            preparedStatement.executeUpdate();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-
     }
 }
