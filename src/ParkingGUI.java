@@ -5,16 +5,11 @@ import java.awt.event.ActionListener;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
 import javax.swing.*;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.TableModel;
 
 /**
  * A user interface to view the movies, add a new movie and to update an existing movie.
@@ -26,7 +21,7 @@ import javax.swing.table.TableModel;
  */
 public class ParkingGUI extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1779520078061383929L;
-	private JButton btnList, btnSearch, btnStaff, btnStaffRes;
+	private JButton btnList, btnVisitor, btnStaff, btnStaffRes;
 	private JPanel pnlButtons, pnlParking;
 
 	private String[] currentStaff = {"1234", "5678", "9101R"};
@@ -82,8 +77,8 @@ public class ParkingGUI extends JFrame implements ActionListener {
 		btnList = new JButton("Parking");
 		btnList.addActionListener(this);
 
-		btnSearch = new JButton("Visitors");
-		btnSearch.addActionListener(this);
+		btnVisitor = new JButton("Visitors");
+		btnVisitor.addActionListener(this);
 		
 		btnStaff = new JButton("Staff");
 		btnStaff.addActionListener(this);
@@ -92,7 +87,7 @@ public class ParkingGUI extends JFrame implements ActionListener {
 		btnStaffRes.addActionListener(this);
 		
 		pnlButtons.add(btnList);
-		pnlButtons.add(btnSearch);
+		pnlButtons.add(btnVisitor);
 		pnlButtons.add(btnStaff);
 		pnlButtons.add(btnStaffRes);
 		add(pnlButtons, BorderLayout.NORTH);
@@ -238,6 +233,7 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			}
 			pnlStaffRes.add(newPanel);
 		}
+        refreshStaffCmb();
 		refreshStaffReservationSpacesCmb();
 		btnSaveStaffRes = new JButton("Reserve");
 		btnSaveStaffRes.addActionListener(this);
@@ -265,27 +261,31 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			pnlParking.removeAll();
 			pnlParking.add(pnlLotSpace);
 			pnlParking.revalidate();
+            refreshStaffCmb();
 			refreshParkingSpaceLotCmb();
 			this.repaint();
 			
 		} else if (e.getSource() == btnSaveVisitorRes){
 			System.out.println("Reserve, clicked");
 			addVisitorReservation();
-		} else if (e.getSource() == btnSearch) {
+		} else if (e.getSource() == btnVisitor) {
 			pnlParking.removeAll();
 			pnlParking.add(pnlVisitor);
 			pnlParking.revalidate();
+            refreshStaffCmb();
 			refreshVisitorSpacesCmb();
 			this.repaint();
 		} else if (e.getSource() == btnStaff) {
 			pnlParking.removeAll();
 			pnlParking.add(pnlStaff);
 			pnlParking.revalidate();
+            refreshStaffCmb();
 			this.repaint();
 		} else if (e.getSource() == btnStaffRes) {
 			pnlParking.removeAll();
 			pnlParking.add(pnlStaffRes);
 			getStaffReservationSpaces();
+            refreshStaffCmb();
 			pnlParking.revalidate();
 			this.repaint();
 		} else if (e.getSource() == btnAddLot){
@@ -523,6 +523,18 @@ public class ParkingGUI extends JFrame implements ActionListener {
 		
 	}
 
+
+/**
+     * refreshes the combo boxes with new visitor spaces.
+     */
+	private void refreshStaffCmb(){
+		String[] staffID = getStaffIDs();
+		DefaultComboBoxModel spacesModel = new DefaultComboBoxModel(staffID);
+		cmbIDStaff.setModel(spacesModel);
+        cmbIDVisit.setModel(spacesModel);
+        cmbIDStaffRes.setModel(spacesModel);
+	}
+
     /**
      * refreshes the combo boxes with new visitor spaces.
      */
@@ -561,6 +573,29 @@ public class ParkingGUI extends JFrame implements ActionListener {
 		} else {
 			JOptionPane.showMessageDialog(this, "Only staff reservation spaces not currently"
 					+ " reserved are displayed, no spaces found");
+			return new String[0];
+		}
+	}
+
+	 /**
+     * Gets all staff ids.
+     * @return a string array with all the staff ids.
+     */
+	private String[] getStaffIDs(){
+		List<Staff> staff = new ArrayList<>();
+		try{
+			staff = ParkingDB.getStaff();
+		} catch (Exception e){
+			JOptionPane.showMessageDialog(this, e.getMessage());
+		}
+		if (staff.size() > 0){
+			String[] staffIDs = new String[staff.size()];
+			for (int i = 0; i < staff.size(); i++){
+				staffIDs[i] = "" + staff.get(i).getStaffID();
+			}
+			return staffIDs;
+		} else {
+			JOptionPane.showMessageDialog(this, "No Staff ID's found");
 			return new String[0];
 		}
 	}

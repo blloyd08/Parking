@@ -165,7 +165,7 @@ public class ParkingDB {
 			createConnection();
 		}
 		Statement stmt = null;
-		String query = "select firstName, lastName, telephone, extention"
+		String query = "select staffID, firstName, lastName, telephone, extention"
 				+ " from " + userName + ".Staff ";
 
 		ArrayList<Staff> staffList = new ArrayList<Staff>();
