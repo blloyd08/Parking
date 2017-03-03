@@ -22,34 +22,14 @@ import javax.swing.*;
 public class ParkingGUI extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1779520078061383929L;
 	private JButton btnList, btnVisitor, btnStaff, btnStaffRes;
-	private JPanel pnlParking;
+    private JPanel pnlParking, pnlVisitor, pnlStaffRes, pnlLotSpace, pnlStaff;
+    private JButton btnSaveVisitorRes, btnSaveStaffRes, btnAddLot, btnAddSpace, btnAddStaff, btnUpdateStaff;
+    private JTextField[] txfLot, txfStaff, txfVisit, txfStaffRes;
+	private JComboBox cmbIDVisit, cmbIDStaffRes, cmbIDStaff, cmbParkVisit, cmbParkStaffRes;
 
-	private String[] currentStaff = {"1234", "5678", "9101R"};
+    private String[] currentStaff = {"1234", "5678", "9101R"};
 	private String[] spaceType = {"Free","Covered","Visitor"};
-
-	private JPanel pnlVisitor;
-	private JPanel pnlStaffRes;
-	private JPanel pnlLotSpace;
-    private JPanel pnlStaff;
-
-    private JButton btnSaveVisitorRes;
-	private JButton btnSaveStaffRes;
-	private JButton btnAddLot;
-	private JButton btnAddSpace;
-    private JButton btnAddStaff;
-
 	private JLabel[] lblLot;
-
-    private JTextField[] txfLot;
-	private JTextField[] txfStaff;
-	private JTextField[] txfVisit;
-	private JTextField[] txfStaffRes;
-
-	private JComboBox cmbIDVisit;
-	private JComboBox cmbIDStaffRes;
-	private JComboBox cmbIDStaff;
-	private JComboBox cmbParkVisit;
-	private JComboBox cmbParkStaffRes;
     private JComboBox[] cmbSpace;
 
     /**
@@ -207,7 +187,10 @@ public class ParkingGUI extends JFrame implements ActionListener {
 		JPanel panel = new JPanel();
 		btnAddStaff = new JButton("Add");
 		btnAddStaff.addActionListener(this);
+		btnUpdateStaff = new JButton("Update");
+		btnUpdateStaff.addActionListener(this);
 		panel.add(btnAddStaff);
+		panel.add(btnUpdateStaff);
 		pnlStaff.add(panel);
 		add(pnlParking, BorderLayout.CENTER);
 
@@ -295,8 +278,26 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			addSpace();
 		} else if (e.getSource() == btnSaveStaffRes){
 			addStaffReservation();
-		}
+		} else if (e.getSource() == btnUpdateStaff) {
+		    updateStaff();
+        }
 	}
+
+    /**
+     * Updates the staff given the currently selected ID in the combobox.
+     */
+    private void updateStaff() {
+        int staffID;
+        String newExtention;
+        String newLicense;
+        if (txfStaff[4].getText().isEmpty() || txfStaff[5].getText().isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a extension and a license number");
+        } else {
+            newExtention = txfStaff[4].getText();
+            newLicense = txfStaff[5].getText();
+            staffID = Integer.parseInt(cmbIDStaff.getSelectedItem().toString());
+        }
+    }
 
     /**
      * adds a new staff member to the database.

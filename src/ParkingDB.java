@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * A class that consists of the database operations to insert and update the Movie information.
+ * A class that consists of the database operations to insert and update the database information.
  * @author mmuppa
  * @author concox
  * @author bbloyd
