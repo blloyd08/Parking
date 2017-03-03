@@ -24,6 +24,7 @@ public class ParkingGUI extends JFrame implements ActionListener {
     private JPanel pnlParking, pnlVisitor, pnlStaffRes, pnlLotSpace, pnlStaff;
     private JButton btnSaveVisitorRes, btnSaveStaffRes, btnAddLot, btnAddSpace, btnAddStaff, btnUpdateStaff;
     private JTextField[] txfLot, txfStaff, txfVisit, txfStaffRes;
+    private JTextField[] txfUpdateStaff;
 	private JComboBox<Staff> myCmbStaffForVisitorReservation;
 	private JComboBox<Staff> cmbIDStaffRes;
 	private JComboBox<Staff> cmbIDStaff;
@@ -184,7 +185,7 @@ public class ParkingGUI extends JFrame implements ActionListener {
 		
 		//Staff Panel
 		pnlStaff = new JPanel();
-		pnlStaff.setLayout(new GridLayout(7, 0));
+		pnlStaff.setLayout(new GridLayout(0, 1));
 		String[] staffColNames = {"Staff ID", "First Name: ", "Last Name: ",
 				"Telephone: ", "Extension: ", "License Number: "};
 		lblStaff = new JLabel[staffColNames.length];
@@ -195,22 +196,43 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			txfStaff[i] = new JTextField(25);
 			panel.add(lblStaff[i]);
 			if(i == 0) {
-				cmbIDStaff = new JComboBox<Staff>();
-				cmbIDStaff.setEditable(true);
-				panel.add(cmbIDStaff);
+				continue;
 			} else {
 				panel.add(txfStaff[i]);
 			}
 			pnlStaff.add(panel);
 		}
-		JPanel panel = new JPanel();
 		btnAddStaff = new JButton("Add");
 		btnAddStaff.addActionListener(this);
+		pnlStaff.add(btnAddStaff);
+		
+		//Add update section
+		JLabel updateHeading  = new JLabel("--- Update Staff ---");
+		updateHeading.setHorizontalAlignment(JLabel.CENTER);
+		pnlStaff.add(updateHeading);
+		
+		JPanel updateButtonPanel = new JPanel();
+		updateButtonPanel.add(new JLabel("Staff ID: "));
+		cmbIDStaff = new JComboBox<Staff>();
+		cmbIDStaff.setSelectedIndex(-1);
+		cmbIDStaff.addActionListener(this);
+		updateButtonPanel.add(cmbIDStaff);
+		pnlStaff.add(updateButtonPanel);
+		String[] updateStaffColNames = {"Telephone","Extension","License Plate: "};
+		txfUpdateStaff = new JTextField[updateStaffColNames.length];
+		for (int i = 0; i< updateStaffColNames.length; i++) {
+			JPanel panel = new JPanel();
+			panel.add(new JLabel(updateStaffColNames[i]));
+			txfUpdateStaff[i] = new JTextField(25);
+			panel.add(txfUpdateStaff[i]);
+			pnlStaff.add(panel);
+		}
+		
+		
+		
 		btnUpdateStaff = new JButton("Update");
 		btnUpdateStaff.addActionListener(this);
-		panel.add(btnAddStaff);
-		panel.add(btnUpdateStaff);
-		pnlStaff.add(panel);
+		pnlStaff.add(btnUpdateStaff);
 		add(pnlParking, BorderLayout.CENTER);
 
 		//Staff reservation
@@ -235,6 +257,9 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			}
 			pnlStaffRes.add(newPanel);
 		}
+		
+		
+		
 		setAllStaffCmb();
 		setAddStaffReservationSpace();
 		btnSaveStaffRes = new JButton("Reserve");
@@ -299,6 +324,22 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			addStaffReservation();
 		} else if (e.getSource() == btnUpdateStaff) {
 		    updateStaff();
+        } else if (e.getSource() == cmbIDStaff){
+        	System.out.println("Triggered " + cmbIDStaff.getSelectedIndex());
+        	if (cmbIDStaff.getSelectedIndex() >= 0){
+        		int staffID = ((Staff)cmbIDStaff.getSelectedItem()).getStaffID();
+        		try{
+        			Staff staff = ParkingDB.getStaff(staffID);
+        			if(staff != null){
+        				txfUpdateStaff[0].setText(staff.getTelephone());
+        				txfUpdateStaff[1].setText(staff.getExtention());
+        				txfUpdateStaff[2].setText(staff.getLicense());
+        			}
+        		} catch (Exception updateE){
+        			JOptionPane.showMessageDialog(this, updateE.getMessage());
+        		}
+        		
+        	}
         }
 	}
 
@@ -306,27 +347,20 @@ public class ParkingGUI extends JFrame implements ActionListener {
      * Updates the staff given the currently selected ID in the combobox.
      */
     private void updateStaff() {
-        int staffID;
-        String newExtention;
-        String newLicense;
-        if (txfStaff[4].getText().isEmpty() || txfStaff[5].getText().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Please enter a extension and a license number");
-        } else {
-            newExtention = txfStaff[4].getText();
-            newLicense = txfStaff[5].getText();
-			String str = cmbIDStaff.getSelectedItem().toString();
-			String numberOnly= str.replaceAll("[^0-9]", "");
-            staffID = Integer.parseInt(numberOnly);
-			System.out.println(staffID);
-			try {
-				ParkingDB.updateStaff(staffID, newExtention, newLicense);
-				JOptionPane.showMessageDialog(this, "Staff updated");
-			} catch (SQLException eSQL) {
-				System.out.println(eSQL.getMessage());
-				JOptionPane.showMessageDialog(this, "Database error");
-
-			}
-        }
+    	Staff newStaff = (Staff)cmbIDStaff.getSelectedItem();
+    	try{
+    		newStaff.setTelephone(txfUpdateStaff[0].getText());
+    		newStaff.setExtention(txfUpdateStaff[1].getText());
+    		newStaff.setLicense(txfUpdateStaff[2].getText());
+    		ParkingDB.updateStaff(newStaff);
+    		JOptionPane.showMessageDialog(this, "Staff sucessfully added");
+    		txfUpdateStaff[0].setText("");
+    		txfUpdateStaff[1].setText("");
+    		txfUpdateStaff[2].setText("");
+    		
+    	} catch (Exception e){
+    		JOptionPane.showMessageDialog(this, e.getMessage());
+    	}
     }
 
     /**
@@ -538,9 +572,11 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			Staff[] staffArray = new Staff[staff.size()];
 			staff.toArray(staffArray);
 			DefaultComboBoxModel<Staff> staffModel = new DefaultComboBoxModel<>(staffArray);
+			DefaultComboBoxModel<Staff> staffResModel = new DefaultComboBoxModel<>(staffArray);
 			cmbIDStaff.setModel(staffModel);
-	        myCmbStaffForVisitorReservation.setModel(staffModel);
-	        cmbIDStaffRes.setModel(staffModel);
+			cmbIDStaff.setSelectedIndex(-1);
+	        myCmbStaffForVisitorReservation.setModel(staffResModel);
+	        cmbIDStaffRes.setModel(staffResModel);
 		} catch (Exception e){
 			JOptionPane.showMessageDialog(this, e.getMessage());
 		}

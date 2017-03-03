@@ -265,23 +265,25 @@ public class ParkingDB {
 	 * @param theID id of the staff member to retrieve
 	 * @return a list of staff members with that id.
 	 */
-	public static List<Staff> getStaff(int theID) throws SQLException {
+	public static Staff getStaff(int theID) throws SQLException {
 		if (conn == null) {
-            createConnection();
-        }
-		List<Staff> staffList = new ArrayList<Staff>();
-		List<Staff> filterList = new ArrayList<>();
-		try {
-			staffList = getStaff();
-		} catch (SQLException e) {
-			e.printStackTrace();
+			createConnection();
 		}
-		for (Staff staff : staffList) {
-			if (staff.getStaffID() == (theID)) {
-				filterList.add(staff);
-			}
+		Statement stmt = null;
+		String sql = "SELECT staffID, firstName, lastName, telephone, extention, licenseNumber"
+				+ " from " + userName + ".Staff WHERE staffID = ?";
+		stmt = conn.createStatement();
+		
+		PreparedStatement preparedStatement = conn.prepareStatement(sql);
+		preparedStatement.setInt(1, theID);
+		ResultSet rs = preparedStatement.executeQuery();
+		
+		List<Staff> staffList = createStaff(rs);
+		if (staffList.size() >0){
+			return staffList.get(0);
+		} else {
+			return null;
 		}
-		return filterList;
 	}
 
 	/**
@@ -389,16 +391,19 @@ public class ParkingDB {
             System.out.println("Lot added");
     }
 
-    public static Boolean updateStaff(int theStaffID, String theExtention, String theLic) throws SQLException {
-        if (conn == null) {
+    public static void updateStaff(Staff staff) throws SQLException {
+    	if (conn == null) {
             createConnection();
         }
         String sql = "UPDATE " + userName + ".Staff " +
-                     "SET extention = '" + theExtention + "', licenseNumber = '" + theLic +
-                     "' WHERE staffID = " + theStaffID + ";";
+        		     "SET telephone = ?, extention = ?, licenseNumber = ?" +
+                     " WHERE staffID = ?";
         System.out.println(sql);
         PreparedStatement preparedStatement = conn.prepareStatement(sql);
+        preparedStatement.setString(1, staff.getTelephone());
+        preparedStatement.setString(2, staff.getExtention());
+        preparedStatement.setString(3, staff.getLicense());
+        preparedStatement.setInt(4, staff.getStaffID());
         preparedStatement.executeUpdate();
-        return true;
     }
 }
