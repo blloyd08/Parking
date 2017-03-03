@@ -7,6 +7,20 @@ Team 10
 -- CREATE DATABASE PARKING;
 -- USE PARKING;
 
+/* Clear Database on CSSGATE
+DROP TABLE StaffReservation;
+DROP TABLE VisitorReservation;
+DROP TABLE Staff;
+DROP TABLE ParkingSpace;
+DROP TABLE ParkingLot;
+DROP TABLE SpaceType;
+DROP VIEW CurrentStaffReservation;
+DROP VIEW LotCounts;
+DROP VIEW StaffWithoutReservation;
+DROP VIEW UnfilledLots;
+DROP VIEW UnregisteredVisitorSpaces;
+DROp VIEW VisitorSpaces; */
+
 CREATE TABLE ParkingLot(
 	lotName VARCHAR(100) PRIMARY KEY,
 	location VARCHAR(100) NOT NULL,
@@ -25,8 +39,9 @@ CREATE TABLE ParkingSpace (
 );
 
 -- Limit Visitor Spaces to 20
-ALTER TABLE ParkingSpace
-ADD CONSTRAINT chk_limit_Visitor CHECK ((SELECT COUNT(*) FROM ParkingSpace WHERE spaceType="Visitor") < 20)
+-- DENIED BY CSSGATE works on local
+-- ALTER TABLE ParkingSpace
+-- ADD CONSTRAINT chk_limit_Visitor CHECK ((SELECT COUNT(*) FROM ParkingSpace WHERE spaceType="Visitor") < 20)
 
 CREATE TABLE Staff (
 	staffID INT AUTO_INCREMENT PRIMARY KEY,
@@ -67,6 +82,12 @@ SELECT *
 FROM Staff S
 WHERE S.staffID NOT IN (SELECT staffID FROM CurrentStaffReservation));
 
+-- Current number of spaces created for a parking lot
+CREATE VIEW LotCounts AS (
+SELECT lotName, COUNT(spaceID) 'Spaces'
+FROM ParkingSpace);
+
+
 -- Parking Space -> Lot Drop Down
 -- Parking Lots that aren't at capacity (Can create more spaces)
 CREATE VIEW UnfilledLots AS (
@@ -81,11 +102,6 @@ CREATE VIEW VisitorSpaces AS (
 SELECT *
 FROM ParkingSpace
 WHERE spaceType = 'Visitor');
-
--- Current number of spaces created for a parking lot
-CREATE VIEW LotCounts AS (
-SELECT lotName, COUNT(spaceID) 'Spaces'
-FROM ParkingSpace);
 
 -- Visitor spaces that are reserved today 
 CREATE VIEW UnregisteredVisitorSpaces AS(
@@ -142,14 +158,14 @@ INSERT INTO StaffReservation VALUES
 ((SELECT spaceID
 FROM ParkingSpace
 WHERE spaceType = 'Covered'
-LIMIT 1), CURDATE(), '2018-01-01', 1, 1.0)
+LIMIT 1), CURDATE(), '2018-01-01', 1, 1.0);
 
 -- Insert visitor reservation
 INSERT INTO VisitorReservation VALUES
 ((SELECT spaceID
 FROM ParkingSpace
 WHERE spaceType = 'Visitor'
-LIMIT 1), CURDATE(), 1, 'ABC-123')
+LIMIT 1), CURDATE(), 1, 'ABC-123');
 
 /*
 -- SELECT STATEMENTS ----- Kept as quick reference
