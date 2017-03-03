@@ -70,7 +70,7 @@ WHERE S.staffID NOT IN (SELECT staffID FROM CurrentStaffReservation));
 -- Parking Space -> Lot Drop Down
 -- Parking Lots that aren't at capacity (Can create more spaces)
 CREATE VIEW UnfilledLots AS (
-SELECT L.lotName
+SELECT L.lotName, L.location, L.capacity, L.floors
 FROM ParkingLot L
 LEFT JOIN LotCounts S
 ON L.lotName = S.lotName
@@ -78,7 +78,7 @@ WHERE capacity > Spaces OR Spaces IS NULL);
 
 -- Visitor Spots (Not checking for reservations)
 CREATE VIEW VisitorSpaces AS (
-SELECT spaceID
+SELECT *
 FROM ParkingSpace
 WHERE spaceType = 'Visitor');
 
@@ -86,6 +86,15 @@ WHERE spaceType = 'Visitor');
 CREATE VIEW LotCounts AS (
 SELECT lotName, COUNT(spaceID) 'Spaces'
 FROM ParkingSpace);
+
+-- Visitor spaces that are reserved today 
+CREATE VIEW UnregisteredVisitorSpaces AS(
+SELECT *
+FROM VisitorSpaces
+WHERE spaceID NOT IN (
+	SELECT spaceID
+	FROM VisitorReservation
+	WHERE reservedDay = CURDATE()));
 
 -- INSERT STATEMENTS ----------------------------------------------------------------------------------------------------------------
 /*
@@ -99,12 +108,6 @@ ParkingSpace -> Visitor Reservation
 Staff -> StaffReservation
 ParkingSpace -> StaffReservation
 */
-
-CREATE TABLE ConstraintTest(
-	test INT AUTO_INCREMENT PRIMARY KEY
-);
-
-INSERT INTO ConstraintTest VALUES()
 
 INSERT INTO SpaceType VALUES
 ("Covered"),
@@ -124,7 +127,7 @@ INSERT INTO Staff (firstName, lastName, telephone, extention, licenseNumber) VAL
 ('Barry', 'White', '(999)999-9999','1234','abc-134'),
 ('Ron', 'Burgendy', '(999)999-9998', '1235', 'as2-as3'),
 ('Tim', 'Burton','(999)999-9999', '1236', 'abc-122'),
-('John', 'Smith','(999)999-9999','1237',NULL);
+('John', 'Smith','(999)999-9999','1237','12c-123');
 
 INSERT INTO ParkingSpace (lotName, spaceType) VALUES
 ('A',"Free"),
@@ -150,6 +153,7 @@ LIMIT 1), CURDATE(), 1, 'ABC-123')
 
 /*
 -- SELECT STATEMENTS ----- Kept as quick reference
+
 -- Lots that aren't at capacity
 -- Parking Space Lots Drop Down
 SELECT P.lotName
