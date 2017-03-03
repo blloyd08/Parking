@@ -27,7 +27,6 @@ public class ParkingDB {
 	 * @throws SQLException if an error occurs.
 	 */
 	private static void createConnection() throws SQLException {
-        String userName = "concox"; //Change to yours
         String password = "fumCin";
         String serverName = "cssgate.insttech.washington.edu";
 		Properties connectionProps = new Properties();
@@ -160,36 +159,6 @@ public class ParkingDB {
         }
     return lots;
     }
-    
-//    /**
-//     * Returns a list of lot names.
-//     * @return lotNames list of names that the lots are named.
-//     * @throws SQLException if an error occurs
-//     */
-//    public static List<String> getLotNames() throws SQLException {
-//        if (conn == null) {
-//            createConnection();
-//        }
-//        Statement stmt = null;
-//        String query = "select lotName from ParkingLot";
-//
-//        ArrayList<String> lotNames = new ArrayList<>();
-//        try {
-//            stmt = conn.createStatement();
-//            ResultSet rs = stmt.executeQuery(query);
-//            while (rs.next()) {
-//                String lotName = rs.getString("lotName");
-//                lotNames.add(lotName);
-//            }
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        } finally {
-//            if (stmt != null) {
-//                stmt.close();
-//            }
-//        }
-//        return lotNames;
-//    }
 
 	/**
 	 * Returns a list of staff objects.
@@ -230,7 +199,7 @@ public class ParkingDB {
     }
 
     /**
-     * Returns a a list of reservations held by staff members.
+     * Returns A list of reservations held by staff members.
      * @return staffResList holds staff reservation objects.
      * @throws SQLException if an error occurs
      */
@@ -279,22 +248,14 @@ public class ParkingDB {
         String query = "select spaceID, reservedDay, staffID, licenseNumber "
                 + "from " + userName + ".StaffReservation ";
         List<VisitorReservation> visitorResList = new ArrayList<>();
-        try {
-            stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery(query);
-            while (rs.next()) {
-                int spaceID = rs.getInt("spaceID");
-                int staffID = rs.getInt("staffID");
-                String licenseNumber = rs.getString("licenseNumber");
-                VisitorReservation vr = new VisitorReservation(spaceID, staffID, licenseNumber);
-                visitorResList.add(vr);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            if (stmt != null) {
-                stmt.close();
-            }
+        stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(query);
+        while (rs.next()) {
+            int spaceID = rs.getInt("spaceID");
+            int staffID = rs.getInt("staffID");
+            String licenseNumber = rs.getString("licenseNumber");
+            VisitorReservation vr = new VisitorReservation(spaceID, staffID, licenseNumber);
+            visitorResList.add(vr);
         }
         return visitorResList;
     }
