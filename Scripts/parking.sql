@@ -1,7 +1,11 @@
-DROP DATABASE PARKING;
-
-CREATE DATABASE PARKING;
-USE PARKING;
+/*
+Brian Lloyd
+Connor Cox
+Team 10
+*/
+-- DROP DATABASE PARKING;
+-- CREATE DATABASE PARKING;
+-- USE PARKING;
 
 CREATE TABLE ParkingLot(
 	lotName VARCHAR(100) PRIMARY KEY,
@@ -20,12 +24,16 @@ CREATE TABLE ParkingSpace (
 	spaceType VARCHAR(15)  NOT NULL REFERENCES SpaceType(`name`)
 );
 
+-- Limit Visitor Spaces to 20
+ALTER TABLE ParkingSpace
+ADD CONSTRAINT chk_limit_Visitor CHECK ((SELECT COUNT(*) FROM ParkingSpace WHERE spaceType="Visitor") < 20)
+
 CREATE TABLE Staff (
 	staffID INT AUTO_INCREMENT PRIMARY KEY,
 	firstName VARCHAR(50) NOT NULL,
 	lastName VARCHAR(50) NOT NULL,
 	telephone CHAR(13) NOT NULL,
-	extention VARCHAR(6),
+	extention VARCHAR(6) NOT NULL,
 	licenseNumber VARCHAR(8) NOT NULL
 );
 
@@ -59,9 +67,6 @@ SELECT *
 FROM Staff S
 WHERE S.staffID NOT IN (SELECT staffID FROM CurrentStaffReservation));
 
-
-SELECT *
-FROM CurrentStaffReservation;
 -- Parking Space -> Lot Drop Down
 -- Parking Lots that aren't at capacity (Can create more spaces)
 CREATE VIEW UnfilledLots AS (
@@ -95,14 +100,11 @@ Staff -> StaffReservation
 ParkingSpace -> StaffReservation
 */
 
--- Lots that aren't at capacity
--- Parking Space Lots Drop Down
-SELECT P.lotName
-FROM concox.ParkingLot P
-LEFT JOIN concox.LotCounts C
-ON P.lotName = C.lotName
-WHERE Spaces IS NULL
-OR capacity > Spaces
+CREATE TABLE ConstraintTest(
+	test INT AUTO_INCREMENT PRIMARY KEY
+);
+
+INSERT INTO ConstraintTest VALUES()
 
 INSERT INTO SpaceType VALUES
 ("Covered"),
@@ -132,6 +134,31 @@ INSERT INTO ParkingSpace (lotName, spaceType) VALUES
 ('A','Visitor'),
 ('A','Visitor');
 
+-- Insert staff reservation
+INSERT INTO StaffReservation VALUES
+((SELECT spaceID
+FROM ParkingSpace
+WHERE spaceType = 'Covered'
+LIMIT 1), CURDATE(), '2018-01-01', 1, 1.0)
+
+-- Insert visitor reservation
+INSERT INTO VisitorReservation VALUES
+((SELECT spaceID
+FROM ParkingSpace
+WHERE spaceType = 'Visitor'
+LIMIT 1), CURDATE(), 1, 'ABC-123')
+
+/*
+-- SELECT STATEMENTS ----- Kept as quick reference
+-- Lots that aren't at capacity
+-- Parking Space Lots Drop Down
+SELECT P.lotName
+FROM concox.ParkingLot P
+LEFT JOIN concox.LotCounts C
+ON P.lotName = C.lotName
+WHERE Spaces IS NULL
+OR capacity > Spaces
+
 -- Spaces that aren't reserved 
 -- Staff Reservation -> Space Drop Down
 SELECT *
@@ -143,17 +170,6 @@ WHERE spaceID NOT IN (
 )
 AND spaceType = "Covered";
 
-SELECT spaceID
-FROM CurrentStaffReservation;
-
-SELECT *
-FROM ParkingSpace
-WHERE spaceID NOT IN (
-	SELECT spaceID
-	FROM StaffReservation
-	WHERE startDate < CURDATE())
-AND spaceType = "Covered";
-
 -- Currently Reserved Spaces
 SELECT *
 FROM StaffReservation
@@ -162,3 +178,4 @@ WHERE endDate < CURDATE();
 -- Lot spaces
 SELECT lotName, COUNT(spaceID) 'Spaces'
 FROM ParkingSpace;
+*/
