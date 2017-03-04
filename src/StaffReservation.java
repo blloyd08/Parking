@@ -41,9 +41,6 @@ public class StaffReservation {
 		return EndDate;
 	}
 	public void setEndDate(Date endDate) {
-		if (this.StartDate.compareTo(endDate) > 0){
-			throw new IllegalArgumentException("Staff reservation end date must be after start date");
-		}
 		EndDate = endDate;
 	}
 	public int getStaffID() {

@@ -292,7 +292,6 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			this.repaint();
 			
 		} else if (e.getSource() == btnSaveVisitorRes){
-			System.out.println("Reserve, clicked");
 			addVisitorReservation();
 		} else if (e.getSource() == btnVisitor) {
 			pnlParking.removeAll();
@@ -325,7 +324,6 @@ public class ParkingGUI extends JFrame implements ActionListener {
 		} else if (e.getSource() == btnUpdateStaff) {
 		    updateStaff();
         } else if (e.getSource() == cmbIDStaff){
-        	System.out.println("Triggered " + cmbIDStaff.getSelectedIndex());
         	if (cmbIDStaff.getSelectedIndex() >= 0){
         		int staffID = ((Staff)cmbIDStaff.getSelectedItem()).getStaffID();
         		try{
@@ -423,7 +421,6 @@ public class ParkingGUI extends JFrame implements ActionListener {
 		
 		//Validate input (Required fields)
 		for (int i = 0; i < txfLot.length; i++){
-			System.out.println(txfLot[i].getText().compareTo(""));
 			//Check floors attribute
 			if (i == 3){
 				if (txfLot[i].getText().compareTo("") ==0){
@@ -515,7 +512,6 @@ public class ParkingGUI extends JFrame implements ActionListener {
 			try {
 				Calendar cal = Calendar.getInstance();
 				DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-DD");
-				cal.setTime(dateFormat.parse(endDateStr));
 				endDate = new Date(cal.getTime().getTime());
 			} catch (Exception e){
 				JOptionPane.showMessageDialog(this, "End date is not in the form yyyy-mm-dd");

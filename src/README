@@ -1,0 +1,26 @@
+Database Implementation Homework
+@author blloyd08
+@author concox
+
+Includes:
+- Java Swing GUI front end application. Allows the user to:
+    - Add parking lots to the database
+    - Add parking spaces to a specific lot
+    - Add visitor parking reservations using dates
+    - Add staff members
+    - Add staff parking reservations using dates
+    - Update existing staff members
+        - Limited to: Phone Number, Extension, License Number
+        - Select A pre-existing staff from a drop down
+    - Dynamically updating combo boxes
+        - Will remove and add items depending on availability
+        - If a lot is full, it will be removed from the reservation page
+        - Staff, Lot, Space combo boxes all update dynamically
+    - Validation and type checking
+        - Strongly written code to prevent user errors
+        - Heavy use of OOP
+- MySQL back end database
+       - Integrated with front end in parkingDB class
+       - Multiple database views are used for easy queries
+       - Included SQL code, works with cssgate and local databases
+       - Code is case sensitive
